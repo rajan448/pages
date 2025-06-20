@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Testing Flashcards</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .flashcard {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0; /* Light border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .flashcard:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-8 text-gray-800">
+            Performance Testing Types
+        </h1>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Flashcard 1: Load Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-blue-700">Load Testing</h2>
+                <p class="text-gray-700">
+                    Evaluates system behavior under expected load. Aims to determine if the application can handle the anticipated user traffic without performance degradation.
+                </p>
+            </div>
+
+            <!-- Flashcard 2: Stress Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-red-700">Stress Testing</h2>
+                <p class="text-gray-700">
+                    Tests the system beyond its normal operational capacity to determine its breaking point and how it recovers from extreme loads. Identifies bottlenecks under high stress.
+                </p>
+            </div>
+
+            <!-- Flashcard 3: Endurance/Soak Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-green-700">Endurance (Soak) Testing</h2>
+                <p class="text-gray-700">
+                    Checks system stability and performance over a prolonged period (e.g., hours or days) to detect memory leaks, resource consumption issues, and degradation.
+                </p>
+            </div>
+
+            <!-- Flashcard 4: Spike Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-purple-700">Spike Testing</h2>
+                <p class="text-gray-700">
+                    Observes system behavior when the load suddenly and drastically increases or decreases, simulating sudden surges in user activity.
+                </p>
+            </div>
+
+            <!-- Flashcard 5: Scalability Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-yellow-700">Scalability Testing</h2>
+                <p class="text-gray-700">
+                    Determines the system's ability to scale up or down (e.g., adding more users, data, or hardware) to meet increasing or decreasing performance demands.
+                </p>
+            </div>
+
+            <!-- Flashcard 6: Volume Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-orange-700">Volume Testing</h2>
+                <p class="text-gray-700">
+                    Assesses system performance and behavior when a large amount of data is processed or stored in the database. Focuses on data capacity and efficiency.
+                </p>
+            </div>
+
+             <!-- Flashcard 7: Concurrency Testing -->
+            <div class="flashcard p-5 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-teal-700">Concurrency Testing</h2>
+                <p class="text-gray-700">
+                    Evaluates how the application handles multiple users accessing the same features or data simultaneously. Ensures data integrity and correct processing.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
