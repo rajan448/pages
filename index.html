@@ -3,22 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Static Website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>My Landing Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <header>
-        <h1>Static Site</h1>
+<body class="bg-gray-100">
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto py-4">
+            <h1 class="text-2xl font-bold">My Website</h1>
+        </nav>
     </header>
-    <main>
-        <p>Simple Pages</p>
-        <ul>
-            <li><a href="pages/perf-flashes.html">Performance Flashes</a></li>
-        </ul>
+
+    <main class="container mx-auto mt-8">
+        <section class="mb-8">
+            <h2 class="text-3xl font-semibold mb-4">Welcome</h2>
+            <p class="text-gray-700">This is a simple landing page.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Features</h2>
+            <ul class="list-disc pl-5 text-gray-700">
+                <li>Feature 1</li>
+                <li>Feature 2</li>
+                <li>Feature 3</li>
+            </ul>
+        </section>
     </main>
-    <footer>
-        <p>&copy; 2025 My Website</p>
+
+    <footer class="bg-gray-200 text-center py-4 mt-8">
+        <p class="text-gray-600">© 2023 My Website</p>
     </footer>
-    <script src="script.js"></script>
 </body>
 </html>
