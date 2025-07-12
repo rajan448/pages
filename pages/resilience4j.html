@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Resilience4j Tutorial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate Gray and Amber -->
+    <!-- Application Structure Plan: A single-page application with a fixed sidebar navigation. This structure allows users to seamlessly switch between different resilience concepts (Setup, Circuit Breaker, Retry, etc.) without losing context. Each section is self-contained with an explanation, code examples, and an interactive demo area. This step-by-step, compartmentalized approach is ideal for a tutorial, as it breaks down a complex topic into manageable parts and reinforces learning through immediate, hands-on feedback. On mobile, the navigation stacks vertically at the top, allowing the main content to flow below. -->
+    <!-- Visualization & Content Choices: 
+        - Project Setup: Goal=Inform, Method=Static text/code blocks, Interaction=None. Justification=Purely informational start.
+        - Circuit Breaker: Goal=Demonstrate State Changes, Method=Interactive button, dynamic text display for state (CLOSED/OPEN/HALF_OPEN), simulated log, and a Chart.js bar chart. Interaction=User clicks to run demo, observes state changes and visualizes the success/failure ratio in the sliding window. Justification=Visually representing the state and metrics is key to understanding this pattern. Library=Chart.js.
+        - Retry: Goal=Demonstrate Repeated Attempts, Method=Interactive button, simulated log. Interaction=User clicks, watches the log to see the retries and backoff delays. Justification=The log is the best way to show the passage of time and repeated attempts.
+        - Rate Limiter: Goal=Demonstrate Request Throttling, Method=Interactive button, simulated log, dynamic counter display. Interaction=User clicks rapidly, sees requests get rejected after the limit is reached. Justification=Shows immediate rejection, a core concept.
+        - Time Limiter: Goal=Demonstrate Timeouts, Method=Interactive button with a number input for delay. Interaction=User sets a delay and sees if the operation succeeds or times out. Justification=Puts the user in control of the condition being tested.
+        - Bulkhead: Goal=Demonstrate Concurrency Limit, Method=Interactive button, simulated log, dynamic counter for active calls. Interaction=User clicks multiple times to see calls get rejected when the concurrency limit is full. Justification=Clearly illustrates resource isolation.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .log-line {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .nav-item.active {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .nav-item:not(.active):hover {
+            background-color: #374151;
+        }
+
+        .code-block {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+
+        /* Chart container styling for responsiveness */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            /* Max width for charts */
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <nav id="main-nav" class="w-full lg:w-64 bg-slate-800 text-slate-200 p-4 flex-shrink-0">
+            <h1 class="text-2xl font-bold text-white mb-6 border-b border-slate-600 pb-4">Resilience4j</h1>
+            <ul class="flex flex-wrap lg:flex-col justify-center lg:justify-start">
+                <li><a href="#setup" class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0 active">Project
+                        Setup</a></li>
+                <li><a href="#circuit-breaker"
+                        class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0">Circuit Breaker</a></li>
+                <li><a href="#retry" class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0">Retry</a></li>
+                <li><a href="#rate-limiter" class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0">Rate
+                        Limiter</a></li>
+                <li><a href="#time-limiter" class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0">Time
+                        Limiter</a></li>
+                <li><a href="#bulkhead"
+                        class="nav-item block py-2.5 px-4 rounded mb-2 lg:mb-2 mr-2 lg:mr-0">Bulkhead</a></li>
+            </ul>
+        </nav>
+
+        <main class="flex-1 p-4 md:p-6 lg:p-10">
+
+            <div id="setup" class="content-section">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Project Setup</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">This tutorial guides you through implementing
+                    resiliency patterns in Spring Boot using Resilience4j. The first step is to create a new project
+                    with the correct dependencies.</p>
+
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-3">1. Create Project with Spring Initializr</h3>
+                    <p class="mb-4 text-sm md:text-base">Navigate to <a href="https://start.spring.io" target="_blank"
+                            class="text-amber-600 hover:underline">start.spring.io</a> and configure your project. The
+                        most important part is adding the required dependencies for our interactive demo.</p>
+                    <h4 class="font-semibold text-base md:text-lg mb-2">Required Dependencies:</h4>
+                    <ul class="list-disc list-inside space-y-2 mb-6 text-sm md:text-base">
+                        <li><span class="font-semibold">Spring Web:</span> For building the RESTful API endpoints we
+                            will protect.</li>
+                        <li><span class="font-semibold">Resilience4j Spring Boot 3:</span> The core library that
+                            integrates Resilience4j with Spring Boot via annotations and configuration.</li>
+                        <li><span class="font-semibold">Spring Boot Actuator:</span> Exposes endpoints to monitor
+                            application metrics, including the state of resilience patterns.</li>
+                        <li><span class="font-semibold">Lombok:</span> Optional, but recommended to reduce boilerplate
+                            code.</li>
+                    </ul>
+
+                    <h3 class="text-xl md:text-2xl font-semibold mb-3">2. Verify `pom.xml`</h3>
+                    <p class="mb-4 text-sm md:text-base">After generating and opening the project in your IDE, your
+                        `pom.xml` file should contain these key dependencies. This establishes the foundation for all
+                        the resilience patterns we will explore.</p>
+                    <div class="code-block">
+                        <button class="copy-btn">Copy</button>
+                        <pre><code>&lt;dependencies&gt;
+    &lt;!-- For building web, including RESTful, applications using Spring MVC --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Resilience4j integration with Spring Boot --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;io.github.resilience4j&lt;/groupId&gt;
+        &lt;artifactId&gt;resilience4j-spring-boot3&lt;/artifactId&gt;
+        &lt;version&gt;2.2.0&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Provides monitoring endpoints --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- Reduces boilerplate code --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+        &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+        &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="circuit-breaker" class="content-section hidden">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Circuit Breaker</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">The Circuit Breaker pattern prevents an application
+                    from repeatedly trying to execute an operation that is likely to fail, which avoids wasting
+                    resources and gives the failing service time to recover. It acts like an electrical circuit breaker,
+                    transitioning between <span class="font-semibold">CLOSED</span>, <span
+                        class="font-semibold text-red-600">OPEN</span>, and <span
+                        class="font-semibold text-yellow-600">HALF_OPEN</span> states based on recent outcomes.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Configuration</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>resilience4j.circuitbreaker:
+  instances:
+    backendA:
+      failureRateThreshold: 50
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 5
+      waitDurationInOpenState: 5s
+      permittedNumberOfCallsInHalfOpenState: 2</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Implementation</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>@CircuitBreaker(name = "backendA", fallbackMethod = "fallback")
+public String riskyOperation() {
+    // This operation might fail
+    if (random.nextBoolean()) {
+        throw new RuntimeException("Operation failed!");
+    }
+    return "Success!";
+}
+
+public String fallback(Throwable t) {
+    return "Fallback response: service unavailable.";
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">Interactive Demo</h3>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
+                        <button id="cb-run-btn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">Run
+                            Simulated API Call</button>
+                        <button id="cb-reset-btn"
+                            class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">Reset
+                            Demo</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Live Status</h4>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="bg-slate-100 p-4 rounded-lg">
+                                    <span class="text-sm text-slate-500">State</span>
+                                    <p id="cb-state" class="text-2xl font-bold">CLOSED</p>
+                                </div>
+                                <div class="bg-slate-100 p-4 rounded-lg">
+                                    <span class="text-sm text-slate-500">Failure Rate</span>
+                                    <p id="cb-failure-rate" class="text-2xl font-bold">0%</p>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold text-lg mt-4 mb-2">Response</h4>
+                            <div id="cb-response" class="p-4 rounded-lg bg-slate-100 min-h-[50px] font-mono text-sm">
+                            </div>
+                            <h4 class="font-semibold text-lg mt-4 mb-2">Sliding Window (Last 10 Calls)</h4>
+                            <div class="chart-wrapper h-[250px] sm:h-[300px] md:h-[350px] lg:h-64">
+                                <canvas id="cb-chart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Server-Side Log</h4>
+                            <div id="cb-log"
+                                class="h-80 md:h-96 bg-gray-900 text-white font-mono text-sm p-4 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="retry" class="content-section hidden">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Retry</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">The Retry pattern automatically re-invokes a failed
+                    operation. It's useful for recovering from transient errors, like a temporary network glitch or a
+                    brief service outage, improving the overall success rate of operations without manual intervention.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Configuration</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>resilience4j.retry:
+  instances:
+    backendB:
+      maxAttempts: 3
+      waitDuration: 500ms
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Implementation</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>@Retry(name = "backendB", fallbackMethod = "fallback")
+public String flakyOperation() {
+    // This operation fails a few times then succeeds
+    if (callCount++ < 2) {
+        throw new RuntimeException("Transient error!");
+    }
+    return "Success after retries!";
+}
+
+public String fallback(Throwable t) {
+    return "Fallback response: operation failed after all retries.";
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">Interactive Demo</h3>
+                    <p class="mb-4 text-sm md:text-base">Click the button below. The operation will fail twice,
+                        triggering retries with exponential backoff (500ms, then 1000ms delay), before succeeding on the
+                        third attempt.</p>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <button id="retry-run-btn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded">Run Flaky
+                            Operation</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Response</h4>
+                            <div id="retry-response" class="p-4 rounded-lg bg-slate-100 min-h-[50px] font-mono text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Server-Side Log</h4>
+                            <div id="retry-log"
+                                class="h-80 md:h-96 bg-gray-900 text-white font-mono text-sm p-4 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rate-limiter" class="content-section hidden">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Rate Limiter</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">The Rate Limiter pattern controls the number of
+                    requests that can be sent to a service within a specific time window. This is essential for
+                    preventing service overloads, managing costs with third-party APIs, and ensuring fair resource
+                    usage.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Configuration</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>resilience4j.ratelimiter:
+  instances:
+    backendC:
+      limitForPeriod: 5
+      limitRefreshPeriod: 10s
+      timeoutDuration: 0ms</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Implementation</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>@RateLimiter(name = "backendC", fallbackMethod = "fallback")
+public String limitedOperation() {
+    return "Request accepted!";
+}
+
+public String fallback(Throwable t) {
+    return "Fallback response: rate limit exceeded.";
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">Interactive Demo</h3>
+                    <p class="mb-4 text-sm md:text-base">This demo allows <strong>5 requests every 10 seconds</strong>.
+                        Click the button rapidly to see the rate limiter in action. Once the limit is hit, further
+                        requests will be rejected until the 10-second period refreshes.</p>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
+                        <button id="rl-run-btn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">Run
+                            Limited Operation</button>
+                        <div class="bg-slate-100 p-4 rounded-lg text-center w-full sm:w-auto">
+                            <span class="text-sm text-slate-500">Permissions Left in Period</span>
+                            <p id="rl-permissions" class="text-2xl font-bold">5</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Response</h4>
+                            <div id="rl-response" class="p-4 rounded-lg bg-slate-100 min-h-[50px] font-mono text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Server-Side Log</h4>
+                            <div id="rl-log"
+                                class="h-80 md:h-96 bg-gray-900 text-white font-mono text-sm p-4 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="time-limiter" class="content-section hidden">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Time Limiter</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">The Time Limiter pattern sets a maximum duration for
+                    an operation to complete. If the operation exceeds this duration, it's considered a failure. This
+                    prevents long-running calls from hogging resources and ensures the application remains responsive.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Configuration</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>resilience4j.timelimiter:
+  instances:
+    backendD:
+      timeoutDuration: 1s
+      cancelRunningFuture: true</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Implementation</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>@TimeLimiter(name = "backendD", fallbackMethod = "fallback")
+public CompletableFuture&lt;String&gt; slowOperation() {
+    return CompletableFuture.supplyAsync(() -> {
+        // Simulate a slow network call
+        sleep(2000); 
+        return "Success!";
+    });
+}
+
+public CompletableFuture&lt;String&gt; fallback(Throwable t) {
+    return CompletableFuture.completedFuture("Fallback: Timed out!");
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">Interactive Demo</h3>
+                    <p class="mb-4 text-sm md:text-base">The timeout is set to <strong>1 second (1000ms)</strong>. Run
+                        the demo with different simulated delays. If the delay is greater than 1000ms, the operation
+                        will time out and trigger the fallback.</p>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
+                        <label for="tl-delay" class="w-full sm:w-auto text-sm md:text-base">Simulated Delay
+                            (ms):</label>
+                        <input type="number" id="tl-delay" value="1500"
+                            class="w-full sm:w-24 p-2 border border-slate-300 rounded-md">
+                        <button id="tl-run-btn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">Run
+                            Slow Operation</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Response</h4>
+                            <div id="tl-response" class="p-4 rounded-lg bg-slate-100 min-h-[50px] font-mono text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Server-Side Log</h4>
+                            <div id="tl-log"
+                                class="h-80 md:h-96 bg-gray-900 text-white font-mono text-sm p-4 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bulkhead" class="content-section hidden">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Bulkhead</h2>
+                <p class="mb-6 text-base md:text-lg text-slate-600">The Bulkhead pattern limits the number of concurrent
+                    executions of a specific operation. This isolates the operation, so if it becomes slow or fails, it
+                    won't exhaust all resources (like threads) and bring down the entire application. It's like having
+                    watertight compartments on a ship.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Configuration</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>resilience4j.bulkhead:
+  instances:
+    backendE:
+      maxConcurrentCalls: 3
+      maxWaitDuration: 0ms</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-semibold mb-3">Implementation</h3>
+                        <div class="code-block">
+                            <button class="copy-btn">Copy</button>
+                            <pre><code>@Bulkhead(name = "backendE", fallbackMethod = "fallback")
+public String concurrentOperation() {
+    // Simulate a 2-second operation
+    sleep(2000);
+    return "Success!";
+}
+
+public String fallback(Throwable t) {
+    return "Fallback response: bulkhead is full.";
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white p-4 md:p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl md:text-2xl font-semibold mb-4">Interactive Demo</h3>
+                    <p class="mb-4 text-sm md:text-base">The bulkhead allows a maximum of <strong>3 concurrent
+                            calls</strong>. Each call takes 2 seconds to complete. Click the button multiple times
+                        quickly. The first 3 calls will be accepted, but any others made while those are running will be
+                        rejected.</p>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
+                        <button id="bh-run-btn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">Run
+                            Concurrent Operation</button>
+                        <div class="bg-slate-100 p-4 rounded-lg text-center w-full sm:w-auto">
+                            <span class="text-sm text-slate-500">Active Calls</span>
+                            <p id="bh-active-calls" class="text-2xl font-bold">0 / 3</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Response Log (All Calls)</h4>
+                            <div id="bh-response"
+                                class="h-80 md:h-96 bg-slate-100 font-mono text-sm p-2 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">Server-Side Log</h4>
+                            <div id="bh-log"
+                                class="h-80 md:h-96 bg-gray-900 text-white font-mono text-sm p-4 rounded-lg overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('#main-nav a');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            function switchTab(hash) {
+                contentSections.forEach(section => {
+                    if ('#' + section.id === hash) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const hash = link.getAttribute('href');
+                    window.location.hash = hash;
+                    switchTab(hash);
+                });
+            });
+
+            const initialHash = window.location.hash || '#setup';
+            switchTab(initialHash);
+
+            function addLog(logEl, message, color = 'text-white') {
+                const timestamp = new Date().toLocaleTimeString();
+                logEl.innerHTML += `<div class="log-line ${color} py-1">[${timestamp}] ${message}</div>`;
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+
+            function setupCopyButtons() {
+                document.querySelectorAll('.copy-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const codeBlock = button.closest('.code-block');
+                        const code = codeBlock.querySelector('pre code').innerText;
+                        navigator.clipboard.writeText(code).then(() => {
+                            button.innerText = 'Copied!';
+                            setTimeout(() => {
+                                button.innerText = 'Copy';
+                            }, 2000);
+                        });
+                    });
+                });
+            }
+            setupCopyButtons();
+
+            // --- Circuit Breaker Demo ---
+            const cb = {
+                state: 'CLOSED', // CLOSED, OPEN, HALF_OPEN
+                config: {
+                    failureRateThreshold: 50,
+                    slidingWindowSize: 10,
+                    minimumNumberOfCalls: 5,
+                    waitDurationInOpenState: 5000,
+                    permittedNumberOfCallsInHalfOpenState: 2,
+                },
+                metrics: {
+                    calls: [], // 1 for success, 0 for failure
+                    failureRate: 0,
+                    halfOpenCalls: 0,
+                },
+                openStateTimeout: null,
+            };
+
+            let cbChart;
+
+            function renderCbChart() {
+                const ctx = document.getElementById('cb-chart').getContext('2d');
+                const labels = Array.from({ length: cb.config.slidingWindowSize }, (_, i) => i + 1);
+                const data = Array(cb.config.slidingWindowSize).fill(null);
+                cb.metrics.calls.forEach((call, index) => {
+                    data[index] = call;
+                });
+
+                const backgroundColors = data.map(d => d === 1 ? 'rgba(74, 222, 128, 0.6)' : d === 0 ? 'rgba(239, 68, 68, 0.6)' : 'rgba(203, 213, 225, 0.6)');
+                const borderColors = data.map(d => d === 1 ? 'rgba(34, 197, 94, 1)' : d === 0 ? 'rgba(220, 38, 38, 1)' : 'rgba(156, 163, 175, 1)');
+
+                if (cbChart) {
+                    cbChart.data.datasets[0].data = data;
+                    cbChart.data.datasets[0].backgroundColor = backgroundColors;
+                    cbChart.data.datasets[0].borderColor = borderColors;
+                    cbChart.update();
+                } else {
+                    cbChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Call Outcome',
+                                data: data,
+                                backgroundColor: backgroundColors,
+                                borderColor: borderColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function (value) {
+                                            if (value === 1) return 'Success';
+                                            if (value === 0) return 'Failure';
+                                            return '';
+                                        }
+                                    },
+                                    max: 1.1
+                                },
+                                x: {
+                                    grid: { display: false }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            if (context.parsed.y === 1) return 'Outcome: Success';
+                                            if (context.parsed.y === 0) return 'Outcome: Failure';
+                                            return 'Outcome: N/A';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+
+            function updateCbState() {
+                const stateEl = document.getElementById('cb-state');
+                stateEl.textContent = cb.state;
+                stateEl.className = 'text-2xl font-bold';
+                if (cb.state === 'OPEN') stateEl.classList.add('text-red-600');
+                if (cb.state === 'HALF_OPEN') stateEl.classList.add('text-yellow-600');
+                if (cb.state === 'CLOSED') stateEl.classList.add('text-green-600');
+                document.getElementById('cb-failure-rate').textContent = `${cb.metrics.failureRate.toFixed(0)}%`;
+                renderCbChart();
+            }
+
+            function calculateCbFailureRate() {
+                if (cb.metrics.calls.length < cb.config.minimumNumberOfCalls) {
+                    cb.metrics.failureRate = 0;
+                    return;
+                }
+                const failures = cb.metrics.calls.filter(c => c === 0).length;
+                cb.metrics.failureRate = (failures / cb.metrics.calls.length) * 100;
+            }
+
+            document.getElementById('cb-reset-btn').addEventListener('click', () => {
+                clearTimeout(cb.openStateTimeout);
+                cb.state = 'CLOSED';
+                cb.metrics.calls = [];
+                cb.metrics.failureRate = 0;
+                cb.metrics.halfOpenCalls = 0;
+                updateCbState();
+                document.getElementById('cb-log').innerHTML = '';
+                document.getElementById('cb-response').innerHTML = '';
+                addLog(document.getElementById('cb-log'), 'Circuit Breaker demo reset.', 'text-yellow-400');
+            });
+
+            document.getElementById('cb-run-btn').addEventListener('click', () => {
+                const logEl = document.getElementById('cb-log');
+                const resEl = document.getElementById('cb-response');
+                addLog(logEl, 'API call initiated...');
+
+                if (cb.state === 'OPEN') {
+                    addLog(logEl, 'Circuit is OPEN. Call not permitted.', 'text-red-400');
+                    resEl.textContent = 'Fallback: Service unavailable (Circuit Open)';
+                    updateCbState();
+                    return;
+                }
+
+                if (cb.state === 'HALF_OPEN') {
+                    cb.metrics.halfOpenCalls++;
+                    if (cb.metrics.halfOpenCalls > cb.config.permittedNumberOfCallsInHalfOpenState) {
+                        addLog(logEl, 'Circuit is HALF_OPEN, but permitted calls exceeded.', 'text-red-400');
+                        resEl.textContent = 'Fallback: Service unavailable (Circuit Half-Open)';
+                        updateCbState();
+                        return;
+                    }
+                    addLog(logEl, `Circuit is HALF_OPEN. Attempting test call ${cb.metrics.halfOpenCalls}/${cb.config.permittedNumberOfCallsInHalfOpenState}...`, 'text-yellow-400');
+                }
+
+                const isSuccess = Math.random() > 0.4; // 60% success chance
+
+                if (isSuccess) {
+                    addLog(logEl, 'API call successful!', 'text-green-400');
+                    resEl.textContent = 'Success!';
+                    if (cb.state === 'HALF_OPEN') {
+                        cb.state = 'CLOSED';
+                        cb.metrics.calls = []; // Reset window on recovery
+                        cb.metrics.halfOpenCalls = 0;
+                        addLog(logEl, 'Circuit has been CLOSED.', 'text-green-400');
+                    } else {
+                        cb.metrics.calls.push(1);
+                    }
+                } else {
+                    addLog(logEl, 'API call failed!', 'text-red-400');
+                    resEl.textContent = 'Fallback: Service unavailable.';
+                    if (cb.state === 'HALF_OPEN') {
+                        cb.state = 'OPEN';
+                        addLog(logEl, 'Test call failed. Circuit has been RE-OPENED.', 'text-red-400');
+                        cb.openStateTimeout = setTimeout(() => {
+                            cb.state = 'HALF_OPEN';
+                            cb.metrics.halfOpenCalls = 0;
+                            addLog(logEl, `Wait time elapsed. Circuit is now HALF_OPEN.`, 'text-yellow-400');
+                            updateCbState();
+                        }, cb.config.waitDurationInOpenState);
+                    } else {
+                        cb.metrics.calls.push(0);
+                    }
+                }
+
+                if (cb.metrics.calls.length > cb.config.slidingWindowSize) {
+                    cb.metrics.calls.shift();
+                }
+
+                calculateCbFailureRate();
+
+                if (cb.state === 'CLOSED' && cb.metrics.failureRate >= cb.config.failureRateThreshold && cb.metrics.calls.length >= cb.config.minimumNumberOfCalls) {
+                    cb.state = 'OPEN';
+                    addLog(logEl, `Failure rate ${cb.metrics.failureRate.toFixed(0)}% exceeded threshold. Circuit is now OPEN.`, 'text-red-400');
+                    cb.openStateTimeout = setTimeout(() => {
+                        cb.state = 'HALF_OPEN';
+                        cb.metrics.halfOpenCalls = 0;
+                        addLog(logEl, `Wait time elapsed. Circuit is now HALF_OPEN.`, 'text-yellow-400');
+                        updateCbState();
+                    }, cb.config.waitDurationInOpenState);
+                }
+                updateCbState();
+            });
+
+            updateCbState();
+
+            // --- Retry Demo ---
+            const retry = {
+                maxAttempts: 3,
+                currentAttempt: 1,
+                waitDuration: 500,
+                backoffMultiplier: 2
+            };
+
+            document.getElementById('retry-run-btn').addEventListener('click', () => {
+                retry.currentAttempt = 1;
+                document.getElementById('retry-run-btn').disabled = true;
+                document.getElementById('retry-log').innerHTML = '';
+                document.getElementById('retry-response').innerHTML = '';
+                runRetryAttempt();
+            });
+
+            function runRetryAttempt() {
+                const logEl = document.getElementById('retry-log');
+                const resEl = document.getElementById('retry-response');
+                addLog(logEl, `Attempt ${retry.currentAttempt}/${retry.maxAttempts}...`);
+
+                if (retry.currentAttempt < retry.maxAttempts) {
+                    addLog(logEl, 'Operation failed. Simulating transient error.', 'text-red-400');
+                    const delay = retry.waitDuration * Math.pow(retry.backoffMultiplier, retry.currentAttempt - 1);
+                    addLog(logEl, `Will retry in ${delay}ms...`, 'text-yellow-400');
+                    retry.currentAttempt++;
+                    setTimeout(runRetryAttempt, delay);
+                } else {
+                    addLog(logEl, 'Operation successful!', 'text-green-400');
+                    resEl.textContent = `Success after ${retry.currentAttempt - 1} retries!`;
+                    document.getElementById('retry-run-btn').disabled = false;
+                }
+            }
+
+            // --- Rate Limiter Demo ---
+            const rl = {
+                limitForPeriod: 5,
+                limitRefreshPeriod: 10000,
+                permissions: 5,
+                periodStartTime: Date.now()
+            };
+
+            document.getElementById('rl-permissions').textContent = rl.permissions;
+
+            document.getElementById('rl-run-btn').addEventListener('click', () => {
+                const logEl = document.getElementById('rl-log');
+                const resEl = document.getElementById('rl-response');
+
+                const now = Date.now();
+                if (now - rl.periodStartTime > rl.limitRefreshPeriod) {
+                    rl.permissions = rl.limitForPeriod;
+                    rl.periodStartTime = now;
+                    addLog(logEl, 'Rate limit period refreshed.', 'text-yellow-400');
+                }
+
+                if (rl.permissions > 0) {
+                    rl.permissions--;
+                    addLog(logEl, 'Request permitted.', 'text-green-400');
+                    resEl.textContent = 'Request accepted!';
+                } else {
+                    addLog(logEl, 'Rate limit exceeded. Request rejected.', 'text-red-400');
+                    resEl.textContent = 'Fallback: Rate limit exceeded.';
+                }
+                document.getElementById('rl-permissions').textContent = rl.permissions;
+            });
+
+            // --- Time Limiter Demo ---
+            document.getElementById('tl-run-btn').addEventListener('click', () => {
+                const logEl = document.getElementById('tl-log');
+                const resEl = document.getElementById('tl-response');
+                const delay = parseInt(document.getElementById('tl-delay').value, 10);
+                const timeout = 1000;
+
+                document.getElementById('tl-run-btn').disabled = true;
+                resEl.innerHTML = '';
+                logEl.innerHTML = '';
+
+                addLog(logEl, `Initiating operation with simulated delay of ${delay}ms...`);
+                addLog(logEl, `Time limit is ${timeout}ms.`);
+
+                const timeoutId = setTimeout(() => {
+                    addLog(logEl, `Operation timed out after ${timeout}ms!`, 'text-red-400');
+                    resEl.textContent = 'Fallback: Timed out!';
+                    clearTimeout(operationId);
+                    document.getElementById('tl-run-btn').disabled = false;
+                }, timeout);
+
+                const operationId = setTimeout(() => {
+                    addLog(logEl, 'Operation completed successfully.', 'text-green-400');
+                    resEl.textContent = 'Success!';
+                    clearTimeout(timeoutId);
+                    document.getElementById('tl-run-btn').disabled = false;
+                }, delay);
+            });
+
+            // --- Bulkhead Demo ---
+            const bh = {
+                maxConcurrentCalls: 3,
+                activeCalls: 0
+            };
+
+            function updateBhStatus() {
+                document.getElementById('bh-active-calls').textContent = `${bh.activeCalls} / ${bh.maxConcurrentCalls}`;
+            }
+            updateBhStatus();
+
+            document.getElementById('bh-run-btn').addEventListener('click', () => {
+                const logEl = document.getElementById('bh-log');
+                const resEl = document.getElementById('bh-response');
+                const callId = Math.random().toString(36).substr(2, 5);
+
+                if (bh.activeCalls >= bh.maxConcurrentCalls) {
+                    addLog(logEl, `[${callId}] Bulkhead is full. Rejecting call.`, 'text-red-400');
+                    resEl.innerHTML += `<div class="text-red-600">Call ${callId}: Fallback: Bulkhead is full.</div>`;
+                    return;
+                }
+
+                bh.activeCalls++;
+                updateBhStatus();
+                addLog(logEl, `[${callId}] Call accepted. Active calls: ${bh.activeCalls}.`, 'text-green-400');
+                resEl.innerHTML += `<div class="text-slate-800">Call ${callId}: Accepted, processing (2s)...</div>`;
+
+                setTimeout(() => {
+                    bh.activeCalls--;
+                    updateBhStatus();
+                    addLog(logEl, `[${callId}] Call finished. Active calls: ${bh.activeCalls}.`, 'text-green-400');
+                    resEl.innerHTML = resEl.innerHTML.replace(`Call ${callId}: Accepted, processing (2s)...`, `<div class="text-green-600">Call ${callId}: Success!</div>`);
+                }, 2000);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
