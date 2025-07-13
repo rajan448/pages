@@ -6,6 +6,8 @@
     <title>Reactive Java Tutorial Playground</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js CDN for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
       /* Inter font import */
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
@@ -1188,27 +1190,27 @@ public class ReactorBackpressure {
                         <h3 class="text-2xl font-semibold text-gray-800 mb-3">
                             <span class="text-indigo-500">😕</span> Explanation for Dummies:
                         </h3>
-                        <p class="text-gray-700 leading-relaxed">${
-                          module.dummies
-                        }</p>
+                        <div class="text-gray-700 leading-relaxed markdown-content">${
+                          marked.parse(module.dummies)
+                        }</div>
                     </div>
 
                     <div class="mb-8">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-3">
                             <span class="text-indigo-500">🧑‍💻</span> Full Technical Definition:
                         </h3>
-                        <p class="text-gray-700 leading-relaxed">${
-                          module.technical
-                        }</p>
+                        <div class="text-gray-700 leading-relaxed markdown-content">${
+                          marked.parse(module.technical)
+                        }</div>
                     </div>
 
                     <div class="mb-8">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-3">
                             <span class="text-indigo-500">💡</span> Use Case Example:
                         </h3>
-                        <p class="text-gray-700 leading-relaxed">${
-                          module.useCase
-                        }</p>
+                        <div class="text-gray-700 leading-relaxed markdown-content">${
+                          marked.parse(module.useCase)
+                        }</div>
                     </div>
 
                     <div class="flex-grow flex flex-col">
