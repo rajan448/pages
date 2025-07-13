@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Java Generics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the code blocks */
+        pre {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        /* Style for inline code */
+        p code, li code {
+            background-color: #334155; /* slate-700 */
+            color: #cbd5e1; /* slate-300 */
+            padding: 0.2em 0.4em;
+            border-radius: 0.3em;
+            font-family: 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+            font-size: 0.875em;
+        }
+        .code-header {
+            background-color: #334155; /* slate-700 */
+            padding: 0.5rem 1rem;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-title {
+            font-size: 0.875rem;
+            color: #cbd5e1; /* slate-300 */
+            font-weight: 500;
+        }
+        .copy-btn {
+            background-color: #475569; /* slate-600 */
+            color: #e2e8f0; /* slate-200 */
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #64748b; /* slate-500 */
+        }
+        .tab-button.active {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300 antialiased">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">Interactive Guide to Java Generics</h1>
+            <p class="text-lg text-slate-400">A single-page app to master generics, from basics to advanced concepts.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8 overflow-x-auto">
+            <div class="border-b border-slate-700">
+                <nav class="-mb-px flex space-x-4" aria-label="Tabs" role="tablist">
+                    <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="why-generics" role="tab" aria-controls="why-generics">
+                        Why Generics?
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="generic-classes" role="tab" aria-controls="generic-classes">
+                        Generic Classes
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="generic-methods" role="tab" aria-controls="generic-methods">
+                        Generic Methods
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="bounded-types" role="tab" aria-controls="bounded-types">
+                        Bounded Types
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="wildcards" role="tab" aria-controls="wildcards">
+                        Wildcards & PECS
+                    </button>
+                     <button class="tab-button whitespace-nowrap py-4 px-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white hover:border-slate-400 focus:outline-none" data-tab="type-erasure" role="tab" aria-controls="type-erasure">
+                        Type Erasure
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <main>
+            <!-- Tab 1: Why Generics? -->
+            <div id="why-generics" class="tab-panel space-y-6" role="tabpanel">
+                <h2 class="text-2xl font-bold text-white">1. Why Do We Need Generics?</h2>
+                
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: The Problem-Solving Box</h3>
+                    <p>Imagine you have a magic box that can hold anything: an apple, a book, a toy. The problem is, when you take something out, you don't know what it is. You might expect an apple but pull out a book. You have to guess, and if you guess wrong (try to take a bite out of a book), things go badly.</p>
+                    <p class="mt-2">Generics are like putting a label on that box. If you label it "Apple Box," the box will only accept apples. Now, when you reach in, you are 100% certain you're getting an apple. No more guesswork, no more painful surprises.</p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition</h3>
+<p>Generics enable types (classes and interfaces) to be parameters when defining classes, interfaces, and methods. This allows for the creation of components that can work over different data types. The primary benefit is providing <strong class="text-white">compile-time type safety</strong>. Instead of using <code>Object</code> to handle multiple types (which requires explicit casting and is prone to runtime <code>ClassCastException</code>), generics allow the compiler to enforce type correctness at the time of writing code, not when it's running.</p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Use Case: A Type-Unsafe List</h3>
+<p class="mb-4">Let's see the problem in action with a simple <code>List</code> before generics were introduced in Java 5.</p>
+                    
+                    <div class="code-header">
+                        <span class="code-title">Before Generics: Using Object and Casting</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class PreGenericsExample {
+    public static void main(String[] args) {
+        List list = new ArrayList(); // A raw list holds Objects
+        list.add("Hello");
+        list.add(123); // Oops, we added an Integer by mistake!
+
+        // We expect a String, but the second element is an Integer.
+        // The compiler doesn't know this!
+        for (Object obj : list) {
+            try {
+                String str = (String) obj; // This will cause a runtime error
+                System.out.println("Retrieved: " + str.toUpperCase());
+            } catch (ClassCastException e) {
+                System.err.println("Error: Could not cast " + obj.getClass().getName() + " to String!");
+            }
+        }
+    }
+}
+// Output:
+// Retrieved: HELLO
+// Error: Could not cast java.lang.Integer to String!
+</code></pre>
+
+                    <p class="mt-6 mb-4">Now, let's fix this with generics. We "label" the list to only accept <code>String</code>s.</p>
+
+                    <div class="code-header">
+                        <span class="code-title">After Generics: Compile-Time Safety</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class PostGenericsExample {
+    public static void main(String[] args) {
+        // We specify the type parameter <String>
+        List&lt;String&gt; list = new ArrayList&lt;&gt;();
+        
+        list.add("Hello");
+        // list.add(123); // COMPILE ERROR! The compiler stops you here.
+        
+        // No casting needed, and it's guaranteed to be a String.
+        for (String str : list) {
+            System.out.println("Retrieved: " + str.toUpperCase());
+        }
+    }
+}
+// Output:
+// Retrieved: HELLO
+</code></pre>
+                </div>
+            </div>
+
+            <!-- Tab 2: Generic Classes -->
+            <div id="generic-classes" class="tab-panel space-y-6" role="tabpanel">
+                <h2 class="text-2xl font-bold text-white">2. Generic Classes & Interfaces</h2>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: The Universal Container</h3>
+                    <p>Imagine you're designing containers. Instead of making a specific "Juice Bottle," a "Milk Carton," and a "Water Flask," you design a universal "Liquid Container." This blueprint has a placeholder for "liquid type." When you manufacture one, you specify the liquid: "Liquid Container for Juice," "Liquid Container for Milk."</p>
+                    <p class="mt-2">A generic class is that blueprint. <code>Box<T></code> is the universal container design. <code>Box<Apple></code> is a box made specifically for apples, and <code>Box<Book></code> is a box made for books.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition</h3>
+                    <p>A generic class or interface is declared with a type parameter section (e.g., <code><T></code>, <code><E></code>, <code><K, V></code>). This type parameter acts as a placeholder for a real type that will be specified when an instance of the class is created or the interface is implemented. <code>T</code> is a convention for Type, <code>E</code> for Element, <code>K</code> for Key, and <code>V</code> for Value.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Use Case: A Reusable Box</h3>
+                    <p class="mb-4">Let's create a simple `Box` class that can hold any object.</p>
+                    <div class="code-header">
+                        <span class="code-title">Generic Box&lt;T&gt; Class</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>public class Box&lt;T&gt; {
+    // T stands for "Type"
+    private T content;
+
+    public void set(T content) {
+        this.content = content;
+    }
+
+    public T get() {
+        return content;
+    }
+}</code></pre>
+
+                    <p class="mt-6 mb-4">Now see how we can use this single `Box` class for different types without any casting.</p>
+                    <div class="code-header">
+                        <span class="code-title">Using the Generic Box</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>public class BoxDemo {
+    public static void main(String[] args) {
+        // Create a Box for Integers
+        Box&lt;Integer&gt; integerBox = new Box&lt;&gt;();
+        integerBox.set(10);
+        // integerBox.set("hello"); // Compile Error!
+        Integer intValue = integerBox.get();
+        System.out.println("Integer value: " + intValue);
+
+        // Create a Box for Strings
+        Box&lt;String&gt; stringBox = new Box&lt;&gt;();
+        stringBox.set("Hello World");
+        String strValue = stringBox.get();
+        System.out.println("String value: " + strValue);
+    }
+}
+// Output:
+// Integer value: 10
+// String value: Hello World
+</code></pre>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Generic Methods -->
+            <div id="generic-methods" class="tab-panel space-y-6" role="tabpanel">
+                 <h2 class="text-2xl font-bold text-white">3. Generic Methods</h2>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: The Shape-Shifting Tool</h3>
+                    <p>Imagine you have a magic wrench. This isn't a normal wrench that only fits one size of bolt. You can hand it any bolt—big, small, square, hexagonal—and it instantly changes shape to fit that specific bolt perfectly. It's a single tool that adapts to whatever you give it.</p>
+                    <p class="mt-2">A generic method is like that wrench. It's a single method that can accept arguments of different types and work with them in a type-safe way. The method adapts its "internal type" based on the arguments you pass to it.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition</h3>
+                    <p>Generic methods are methods that introduce their own type parameters. The scope of this type parameter is limited to the method where it is declared. This allows for type-safe operations on types that are specific to a single method call. The type parameter section is declared before the method's return type. You can have generic methods inside both generic and non-generic classes.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Use Case: A Utility to Print Any Array</h3>
+                    <p class="mb-4">Let's write a utility method that can print the elements of any type of array.</p>
+                    <div class="code-header">
+                        <span class="code-title">A Generic printArray Method</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>public class GenericMethodUtil {
+    // The &lt;E&gt; before void indicates this is a generic method.
+    // E is the type parameter for this method only.
+    public static &lt;E&gt; void printArray(E[] inputArray) {
+        // Display array elements
+        for (E element : inputArray) {
+            System.out.printf("%s ", element);
+        }
+        System.out.println();
+    }
+
+    public static void main(String args[]) {
+        // Create arrays of different types
+        Integer[] intArray = { 1, 2, 3, 4, 5 };
+        Double[] doubleArray = { 1.1, 2.2, 3.3, 4.4 };
+        Character[] charArray = { 'H', 'E', 'L', 'L', 'O' };
+
+        System.out.println("Array integerArray contains:");
+        printArray(intArray); // Pass an Integer array
+
+        System.out.println("\nArray doubleArray contains:");
+        printArray(doubleArray); // Pass a Double array
+
+        System.out.println("\nArray characterArray contains:");
+        printArray(charArray); // Pass a Character array
+    }
+}
+// Output:
+// Array integerArray contains:
+// 1 2 3 4 5 
+//
+// Array doubleArray contains:
+// 1.1 2.2 3.3 4.4 
+//
+// Array characterArray contains:
+// H E L L O 
+</code></pre>
+                </div>
+            </div>
+
+            <!-- Tab 4: Bounded Types -->
+            <div id="bounded-types" class="tab-panel space-y-6" role="tabpanel">
+                <h2 class="text-2xl font-bold text-white">4. Bounded Type Parameters</h2>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: The "VIP Only" Club</h3>
+                    <p>Imagine a club with a special room. You can't just let anyone in; they need to have a specific qualification. For example, the "Musicians' Lounge" only admits people who can play an instrument. The bouncer doesn't care if you're a guitarist, a pianist, or a drummer, as long as you `are a` musician.</p>
+<p class="mt-2">Bounded types are like that rule. You can create a generic class or method that works only with types that "extend" a certain class or "implement" a certain interface. For example, a method that only works with `Number`s (Integer, Double, Float are all welcome) or things that are `Comparable`.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition</h3>
+                    <p>Bounded type parameters restrict the types that can be used as arguments for a generic type. This is achieved using the `extends` keyword, followed by the upper bound. Note that `extends` is used for both classes (to extend) and interfaces (to implement).</p>
+                    <p class="mt-2">The syntax `<T extends UpperBound>` means that `T` can be any type that is a subtype of `UpperBound`, or `UpperBound` itself. You can have multiple bounds using the `&` operator, e.g., `<T extends Number & Comparable<T>>`.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Use Case: A Method that Only Works on Numbers</h3>
+                    <p class="mb-4">Let's create a method that inspects a value but only makes sense for numeric types.</p>
+                    <div class="code-header">
+                        <span class="code-title">Bounded Type Parameter with extends</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>public class BoundedTypeExample {
+
+    // This method accepts any type 'T' as long as it extends Number.
+    // This means T can be Integer, Double, Float, Long, etc.
+    public static &lt;T extends Number&gt; void inspect(T number) {
+        System.out.println("Class: " + number.getClass().getName());
+        System.out.println("Value (as double): " + number.doubleValue());
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Inspecting an Integer:");
+        inspect(10); // OK
+
+        System.out.println("\nInspecting a Double:");
+        inspect(15.5); // OK
+        
+        // inspect("some text"); // COMPILE ERROR! String does not extend Number.
+    }
+}
+// Output:
+// Inspecting an Integer:
+// Class: java.lang.Integer
+// Value (as double): 10.0
+//
+// Inspecting a Double:
+// Class: java.lang.Double
+// Value (as double): 15.5
+</code></pre>
+                </div>
+            </div>
+
+            <!-- Tab 5: Wildcards & PECS -->
+            <div id="wildcards" class="tab-panel space-y-6" role="tabpanel">
+                <h2 class="text-2xl font-bold text-white">5. Wildcards and the PECS Principle</h2>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: Flexible Food Baskets</h3>
+                    <p>Imagine you have baskets for carrying food.</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>`List<Fruit>`: A basket that holds <strong class="text-white">only and exactly Fruit</strong>. You can't put an Apple in it if you think of Apple as different from Fruit.</li>
+                        <li>`List<?>` (A Basket of Unknown Food): You can look inside and see what's there, but you can't add anything to it because you don't know what kind of food it's for. Maybe it's a meat-only basket? You can't risk putting an apple in it.</li>
+                        <li>`List<? extends Fruit>` (A Basket of Fruit or Sub-types): This basket might hold Apples, or Bananas, or just generic Fruit. You can <strong class="text-white">take things out</strong> and you know they'll at least be a `Fruit`. But you can't put anything in (except `null`), because you don't know if it's an Apple-only basket or a Banana-only basket. This is a **Producer** (you get stuff from it).</li>
+                        <li>`List<? super Apple>` (A Basket for Apples or Super-types): This basket is designed to hold Apples, or Fruit, or even general Objects. You can safely <strong class="text-white">put an Apple into it</strong>. But when you take something out, you can't be sure if it's an Apple, a Fruit, or an Object. So you can only treat it as a basic `Object`. This is a **Consumer** (you put stuff into it).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition & PECS</h3>
+                    <p>Wildcards (`?`) represent an unknown type and are used to create more flexible and reusable APIs.</p>
+                    <ul class="list-disc list-inside mt-2 space-y-2">
+                        <li><strong class="text-white">Upper Bounded Wildcard `<? extends T>`:</strong> Represents `T` or any subtype of `T`. These are <strong class="text-white">covariant</strong>. You can read `T`s from the structure, but you cannot write to it (except `null`). It's a producer of `T`s.</li>
+                        <li><strong class="text-white">Lower Bounded Wildcard `<? super T>`:</strong> Represents `T` or any supertype of `T`. These are <strong class="text-white">contravariant</strong>. You can write `T`s (or subtypes of `T`) into the structure, but when you read from it, you can only be sure you're getting an `Object`. It's a consumer of `T`s.</li>
+                        <li><strong class="text-white">Unbounded Wildcard `<?>`:</strong> Represents any type. It's useful when the type doesn't matter for the method's logic. It's generally read-only.</li>
+                    </ul>
+                    <p class="mt-4 p-4 bg-slate-700 rounded-md">This leads to the famous principle: <strong class="text-sky-300">PECS: Producer Extends, Consumer Super.</strong></p>
+                    <p class="mt-2">"Use an `extends` wildcard when you only need to get values out of a structure (Producer). Use a `super` wildcard when you only need to put values into a structure (Consumer)."</p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Use Case: Processing Collections</h3>
+                    <p class="mb-4">Let's see PECS in action. We have a list of Integers, Doubles, etc., and we want to sum them up.</p>
+                    <div class="code-header">
+                        <span class="code-title">Producer Extends: Reading from a list</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>import java.util.Arrays;
+import java.util.List;
+
+public class ProducerExtendsExample {
+    // This method can read from a list of any type that is a Number.
+    // It's a producer of Numbers.
+    public static double sumOfList(List&lt;? extends Number&gt; list) {
+        double sum = 0.0;
+        for (Number n : list) {
+            sum += n.doubleValue();
+        }
+        // list.add(5); // COMPILE ERROR! Can't add to an 'extends' wildcard list.
+        return sum;
+    }
+
+    public static void main(String[] args) {
+        List&lt;Integer&gt; intList = Arrays.asList(1, 2, 3);
+        System.out.println("Sum = " + sumOfList(intList));
+
+        List&lt;Double&gt; doubleList = Arrays.asList(1.1, 2.2, 3.3);
+        System.out.println("Sum = " + sumOfList(doubleList));
+    }
+}
+</code></pre>
+                    <p class="mt-6 mb-4">Now, let's add numbers to a list. The list must be able to accept Integers.</p>
+                     <div class="code-header">
+                        <span class="code-title">Consumer Super: Writing to a list</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class ConsumerSuperExample {
+    // This method can add Integers to a list of Integers, or a list of its supertypes (Number, Object).
+    // It's a consumer of Integers.
+    public static void addNumbers(List&lt;? super Integer&gt; list) {
+        for (int i = 1; i <= 5; i++) {
+            list.add(i);
+        }
+        // Object o = list.get(0); // You can only safely read as Object.
+    }
+
+    public static void main(String[] args) {
+        List&lt;Integer&gt; intList = new ArrayList&lt;&gt;();
+        addNumbers(intList);
+        System.out.println("Integer List: " + intList);
+
+        List&lt;Number&gt; numList = new ArrayList&lt;&gt;();
+        addNumbers(numList);
+        System.out.println("Number List: " + numList);
+        
+        List&lt;Object&gt; objList = new ArrayList&lt;&gt;();
+        addNumbers(objList);
+        System.out.println("Object List: " + objList);
+    }
+}
+</code></pre>
+                </div>
+            </div>
+            
+            <!-- Tab 6: Type Erasure -->
+            <div id="type-erasure" class="tab-panel space-y-6" role="tabpanel">
+                <h2 class="text-2xl font-bold text-white">6. Type Erasure</h2>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">For Dummies: The Secret Recipe</h3>
+                    <p>You bake a beautiful cake using a special "Fruit Cake" recipe (`List<Fruit>`). The recipe ensures you only add fruit. Once the cake is baked and out of the oven, it's just a "Cake" (`List`). Someone looking at the final cake can't see the original recipe that was used. They just see a delicious cake.</p>
+                    <p class="mt-2">However, the baker (the compiler) added secret instructions (casts) inside the cake. So, when you ask for a slice, the baker knows to give you a piece of fruit, not something else. The specific "Fruit" information is gone from the final product (the bytecode), but the safety is still there thanks to the compiler's hidden work.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Technical Definition</h3>
+                    <p>Type erasure is the process by which the Java compiler removes generic type information after compilation. All type parameters are replaced by their bounds or by `Object` if the type parameter is unbounded. This means that at runtime, the JVM has no knowledge of the generic types like `List<String>` or `List<Integer>`; it only sees a raw `List`.</p>
+                    <p class="mt-2">The compiler enforces type safety by inserting necessary casts automatically at compile time. This mechanism ensures backward compatibility with pre-generics Java code.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold text-sky-400 mb-3">Implications and Limitations</h3>
+                    <p class="mb-4">Because of type erasure, there are some things you cannot do with generics.</p>
+                    <div class="code-header">
+                        <span class="code-title">Limitations of Generics due to Type Erasure</span>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <pre><code>public class TypeErasureLimitations&lt;T&gt; {
+
+    public void someMethod(List&lt;String&gt; stringList) {
+        // ...
+    }
+
+    // COMPILE ERROR: Erasure of method someMethod(List&lt;String&gt;) is the same as
+    // another method in type TypeErasureLimitations&lt;T&gt;
+    // public void someMethod(List&lt;Integer&gt; intList) {
+    //     // At runtime, both are just someMethod(List list)
+    // }
+
+    public void demonstrateLimitations() {
+        // 1. Cannot create an instance of a type parameter
+        // T newItem = new T(); // COMPILE ERROR
+
+        // 2. Cannot create an array of a generic type
+        // T[] array = new T[10]; // COMPILE ERROR
+
+        // 3. Cannot use instanceof with a generic type parameter
+        List&lt;Integer&gt; intList = new ArrayList&lt;&gt;();
+        // if (intList instanceof List&lt;Integer&gt;) { } // COMPILE ERROR
+        if (intList instanceof List) { // This is OK
+             System.out.println("It's a List, but we don't know the element type at runtime.");
+        }
+        
+        // 4. Cannot have a static field of a type parameter
+        // private static T staticField; // COMPILE ERROR
+    }
+}
+</code></pre>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-button');
+            const panels = document.querySelectorAll('.tab-panel');
+            const copyButtons = document.querySelectorAll('.copy-btn');
+
+            // Function to switch tabs
+            const switchTab = (tabButton) => {
+                const tabId = tabButton.dataset.tab;
+
+                // Deactivate all tabs and panels
+                tabs.forEach(t => t.classList.remove('active', 'border-blue-600', 'text-white'));
+                panels.forEach(p => p.classList.remove('active'));
+
+                // Activate the clicked tab and corresponding panel
+                tabButton.classList.add('active', 'border-blue-600', 'text-white');
+                document.getElementById(tabId).classList.add('active');
+            };
+
+            // Add click listener to tab buttons
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab));
+            });
+
+            // Set the first tab as active by default
+            if (tabs.length > 0) {
+                switchTab(tabs[0]);
+            }
+            
+            // Add click listener to copy buttons
+            copyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const pre = button.closest('.code-header').nextElementSibling;
+                    const code = pre.querySelector('code');
+                    
+                    // Create a temporary textarea to hold the text
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code.textContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        button.textContent = 'Copied!';
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        button.textContent = 'Error';
+                    }
+                    document.body.removeChild(textArea);
+
+                    // Revert button text after a delay
+                    setTimeout(() => {
+                        button.textContent = 'Copy';
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
