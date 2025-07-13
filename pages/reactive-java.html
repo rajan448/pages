@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reactive Java Tutorial Playground</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Inter font import */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Custom scrollbar for code blocks */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #2d3748; /* gray-800 */
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4a5568; /* gray-600 */
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280; /* gray-500 */
+      }
+      /* Ensure textarea fills its container and allows scrolling */
+      textarea {
+        min-height: 200px; /* Minimum height for the code editor */
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 font-sans text-gray-900 p-4 md:p-8"
+  >
+    <div class="max-w-6xl mx-auto py-8">
+      <h1
+        class="text-5xl font-extrabold text-center text-indigo-800 mb-10 drop-shadow-md"
+      >
+        Reactive Java Tutorial Playground
+      </h1>
+
+      <div class="flex flex-col md:flex-row gap-6 mb-8">
+        <!-- Module Navigation -->
+        <div class="md:w-1/4 bg-white rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
+            Modules
+          </h2>
+          <nav>
+            <ul id="module-nav" class="space-y-2">
+              <!-- Module buttons will be injected here by JavaScript -->
+            </ul>
+          </nav>
+        </div>
+
+        <!-- Module Content Area -->
+        <div id="module-content-area" class="md:w-3/4">
+          <!-- Module content will be injected here by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-8 p-4 bg-white rounded-xl shadow-lg">
+        <button
+          id="prev-module-btn"
+          class="py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out bg-indigo-500 hover:bg-indigo-600 text-white shadow-md transform hover:scale-105"
+        >
+          &larr; Previous Module
+        </button>
+        <button
+          id="next-module-btn"
+          class="py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out bg-indigo-500 hover:bg-indigo-600 text-white shadow-md transform hover:scale-105"
+        >
+          Next Module &rarr;
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Module data for the tutorial
+      const modulesData = [
+        {
+          title: "Module 1: Introduction to Reactive Programming",
+          dummies: `Imagine you order a pizza. In traditional (imperative) programming, you'd constantly check if the pizza is ready. In reactive programming, you tell the pizza shop, "Call me when it's done!" 📞 and then you go do other things. The pizza shop will *push* the notification to you when it's ready. It's about reacting to events as they happen, rather than constantly asking for updates.`,
+          technical: `**Reactive programming** is an asynchronous programming paradigm concerned with data streams and the propagation of change. It provides a set of tools and techniques to handle **asynchronous events**, **data flows**, and **backpressure** in a concise, declarative, and composable manner. Key tenets include **non-blocking operations**, **event-driven architectures**, and **resilience** to failures.`,
+          useCase: `Consider a real-time stock ticker application. Instead of repeatedly querying the stock market API for updates, a reactive approach would allow the application to **subscribe** to a stream of stock price changes, receiving new prices as soon as they become available. This leads to more efficient resource utilization and a more responsive user experience.`,
+          code: `// Traditional (Imperative) approach: Polling
+public class StockWatcherImperative {
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("Starting imperative stock watcher...");
+        for (int i = 0; i < 5; i++) {
+            Thread.sleep(1000); // Simulating checking for updates
+            double price = getStockPrice("AAPL");
+            System.out.println("Current AAPL price (polled): " + price);
+        }
+        System.out.println("Imperative stock watcher finished.");
+    }
+
+    private static double getStockPrice(String symbol) {
+        // In a real app, this would be an API call
+        return 150.00 + Math.random() * 5;
+    }
+}
+
+// Conceptual Reactive approach (Illustrative, not executable reactive code)
+// Imagine a system where getStockPrice pushes updates to a listener.
+interface StockPriceListener {
+    void onNewPrice(String symbol, double price);
+}
+
+class StockMarketAPI {
+    private StockPriceListener listener;
+
+    public void subscribe(StockPriceListener listener) {
+        this.listener = listener;
+        // In a real app, this would be a continuous stream
+        new Thread(() -> {
+            try {
+                for (int i = 0; i < 5; i++) {
+                    Thread.sleep(1500);
+                    listener.onNewPrice("GOOG", 2500.00 + Math.random() * 10);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+    }
+}
+
+public class StockWatcherReactiveConcept {
+    public static void main(String[] args) {
+        System.out.println("Starting conceptual reactive stock watcher...");
+        StockMarketAPI api = new StockMarketAPI();
+        api.subscribe((symbol, price) ->
+            System.out.println("New " + symbol + " price (received): " + price)
+        );
+        System.out.println("Subscribed and waiting for updates...");
+        // In a real reactive app, main thread would not block here,
+        // it would be free to do other tasks.
+    }
+}`,
+          simulatedOutput: `Starting imperative stock watcher...
+Current AAPL price (polled): 152.34
+Current AAPL price (polled): 154.12
+Current AAPL price (polled): 150.98
+Current AAPL price (polled): 153.76
+Current AAPL price (polled): 151.55
+Imperative stock watcher finished.
+Starting conceptual reactive stock watcher...
+Subscribed and waiting for updates...
+New GOOG price (received): 2505.67
+New GOOG price (received): 2508.91
+New GOOG price (received): 2501.23
+New GOOG price (received): 2507.45
+New GOOG price (received): 2503.88`,
+        },
+        {
+          title: "Module 2: Core Principles of Reactive Programming",
+          dummies: `Think of a **water hose**.
+* **Publisher:** The tap (source of water). It sends out water.
+* **Subscriber:** The bucket (where water goes). It receives water.
+* **Subscription:** The connection between the tap and the bucket (the hose itself).
+* **Backpressure:** If your bucket is small, you don't want the tap to blast water so fast it overflows. You want to tell the tap, "Hey, slow down! I can only handle this much at a time." This is backpressure – the subscriber telling the publisher how much data it can handle.`,
+          technical: `The **Reactive Streams** specification defines a standard for asynchronous stream processing with non-blocking backpressure. It specifies four core interfaces:
+1.  **\`Publisher<T>\`**: Represents a source of \`T\` items, potentially unbounded. It can be subscribed to by \`Subscriber\`s.
+2.  **\`Subscriber<T>\`**: Represents a consumer of \`T\` items. It receives notifications of new data, completion, or errors.
+3.  **\`Subscription\`**: Represents a one-to-one relationship between a \`Publisher\` and a \`Subscriber\`. It allows the \`Subscriber\` to request data and cancel the subscription.
+4.  **\`Processor<T, R>\`**: Represents a processing stage that is both a \`Subscriber\` and a \`Publisher\`, transforming items from one type to another.
+
+**Backpressure** is a crucial mechanism where the \`Subscriber\` explicitly signals to the \`Publisher\` how many items it is willing to receive, preventing the \`Publisher\` from overwhelming the \`Subscriber\`.`,
+          useCase: `Imagine an IoT sensor network sending environmental data (temperature, humidity) at a very high rate. A central processing unit (CPU) might not be able to process all data points simultaneously. Using Reactive Streams with **backpressure** would allow the CPU (Subscriber) to inform the sensors (Publishers) to reduce their data transmission rate when the CPU is nearing its capacity, preventing data loss and system overload.`,
+          code: `import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+public class ReactiveStreamsExample {
+
+    // 1. Publisher: The source of data
+    static class MyPublisher implements Publisher<Integer> {
+        @Override
+        public void subscribe(Subscriber<? super Integer> subscriber) {
+            // A real publisher would generate items over time
+            System.out.println("MyPublisher: Subscriber connected. Sending subscription.");
+            subscriber.onSubscribe(new MySubscription(subscriber));
+        }
+    }
+
+    // 2. Subscriber: The consumer of data
+    static class MySubscriber implements Subscriber<Integer> {
+        private Subscription subscription;
+        private int receivedCount = 0;
+        private final int requestBatchSize;
+
+        public MySubscriber(int requestBatchSize) {
+            this.requestBatchSize = requestBatchSize;
+        }
+
+        @Override
+        public void onSubscribe(Subscription s) {
+            this.subscription = s;
+            System.out.println("MySubscriber: Subscribed! Requesting " + requestBatchSize + " items.");
+            s.request(requestBatchSize); // Request initial batch
+        }
+
+        @Override
+        public void onNext(Integer item) {
+            receivedCount++;
+            System.out.println("MySubscriber: Received item: " + item + " (Total: " + receivedCount + ")");
+            if (receivedCount % requestBatchSize == 0) {
+                System.out.println("MySubscriber: Processed batch. Requesting " + requestBatchSize + " more items.");
+                subscription.request(requestBatchSize); // Request more items after processing a batch
+            }
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            System.err.println("MySubscriber: Error: " + t.getMessage());
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.println("MySubscriber: All items received. Completed!");
+        }
+    }
+
+    // 3. Subscription: The bridge between Publisher and Subscriber
+    static class MySubscription implements Subscription {
+        private final Subscriber<? super Integer> subscriber;
+        private boolean cancelled = false;
+        private int sentCount = 0;
+
+        public MySubscription(Subscriber<? super Integer> subscriber) {
+            this.subscriber = subscriber;
+        }
+
+        @Override
+        public void request(long n) {
+            if (cancelled) return;
+            if (n <= 0) {
+                subscriber.onError(new IllegalArgumentException("Request must be positive"));
+                return;
+            }
+            System.out.println("MySubscription: Publisher received request for " + n + " items.");
+            // Simulate sending items up to 'n'
+            for (int i = 0; i < n; i++) {
+                if (cancelled) break;
+                sentCount++;
+                if (sentCount > 10) { // Simulate finite stream
+                    subscriber.onComplete();
+                    return;
+                }
+                subscriber.onNext(sentCount);
+            }
+        }
+
+        @Override
+        public void cancel() {
+            System.out.println("MySubscription: Subscription cancelled.");
+            cancelled = true;
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("--- Reactive Streams Core Interfaces Example ---");
+        MyPublisher publisher = new MyPublisher();
+        MySubscriber subscriber = new MySubscriber(3); // Request 3 items at a time
+        publisher.subscribe(subscriber);
+    }
+}`,
+          simulatedOutput: `--- Reactive Streams Core Interfaces Example ---
+MyPublisher: Subscriber connected. Sending subscription.
+MySubscriber: Subscribed! Requesting 3 items.
+MySubscription: Publisher received request for 3 items.
+MySubscriber: Received item: 1 (Total: 1)
+MySubscriber: Received item: 2 (Total: 2)
+MySubscriber: Received item: 3 (Total: 3)
+MySubscriber: Processed batch. Requesting 3 more items.
+MySubscription: Publisher received request for 3 items.
+MySubscriber: Received item: 4 (Total: 4)
+MySubscriber: Received item: 5 (Total: 5)
+MySubscriber: Received item: 6 (Total: 6)
+MySubscriber: Processed batch. Requesting 3 more items.
+MySubscription: Publisher received request for 3 items.
+MySubscriber: Received item: 7 (Total: 7)
+MySubscriber: Received item: 8 (Total: 8)
+MySubscriber: Received item: 9 (Total: 9)
+MySubscriber: Processed batch. Requesting 3 more items.
+MySubscription: Publisher received request for 3 items.
+MySubscriber: Received item: 10 (Total: 10)
+MySubscriber: All items received. Completed!`,
+        },
+        {
+          title: "Module 3: Introducing Project Reactor - Flux and Mono",
+          dummies: `Think of a **conveyor belt** delivering items.
+* **\`Flux\`**: A conveyor belt that can deliver **many** items, one after another, over time. It's like a stream of endless candy. 🍬🍬🍬
+* **\`Mono\`**: A special conveyor belt that delivers **at most one** item, or possibly no item at all (an empty box). It's like a delivery service for a single, important package. 📦
+
+Both \`Flux\` and \`Mono\` are "lazy" – nothing happens until someone "subscribes" to them (i.e., puts their hands out to receive items from the conveyor belt).`,
+          technical: `**Project Reactor** is a reactive programming library for Java 8+, built on the Reactive Streams specification. It provides two main reactive types:
+* **\`Flux<T>\`**: Represents a reactive sequence of 0 to N items. It can emit an unbounded number of elements, complete successfully, or error out. It implements the \`Publisher\` interface.
+* **\`Mono<T>\`**: Represents a reactive sequence of 0 or 1 item. It can emit a single element, complete successfully, or error out. It also implements the \`Publisher\` interface.
+
+These types are immutable and represent a pipeline of operations that will be executed upon subscription.`,
+          useCase: `* **\`Flux\`**: Reading lines from a large file, processing a stream of incoming log messages, handling multiple user requests from a web server.
+* **\`Mono\`**: Fetching a single user profile from a database, performing a single HTTP GET request that returns one JSON object, saving a single record to a database and getting a confirmation.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+public class ReactorCoreTypes {
+
+    public static void main(String[] args) {
+        System.out.println("--- Flux Examples ---");
+
+        // 1. Flux from an array
+        Flux<String> fruitFlux = Flux.fromArray(new String[]{"Apple", "Banana", "Orange"});
+        System.out.println("Subscribing to fruitFlux (array):");
+        fruitFlux.subscribe(
+            fruit -> System.out.println("Received fruit: " + fruit), // onNext
+            error -> System.err.println("Error: " + error),         // onError
+            () -> System.out.println("Fruit stream completed.")     // onComplete
+        );
+        System.out.println("\\n");
+
+        // 2. Flux from a sequence of items
+        Flux<Integer> numberFlux = Flux.just(1, 2, 3, 4, 5);
+        System.out.println("Subscribing to numberFlux (just):");
+        numberFlux.filter(n -> n % 2 == 0) // Only even numbers
+                  .map(n -> n * 10)       // Multiply by 10
+                  .subscribe(
+                      number -> System.out.println("Processed number: " + number),
+                      Throwable::printStackTrace,
+                      () -> System.out.println("Number stream completed.")
+                  );
+        System.out.println("\\n");
+
+        // 3. Flux from a range (infinite stream, but we limit it)
+        Flux<Long> longFlux = Flux.range(1, 10) // Emits 1 to 10
+                                  .map(i -> (long) i * 100);
+        System.out.println("Subscribing to longFlux (range and map):");
+        longFlux.subscribe(
+            l -> System.out.println("Generated long: " + l),
+            Throwable::printStackTrace,
+            () -> System.out.println("Long stream completed.")
+        );
+        System.out.println("\\n");
+
+
+        System.out.println("--- Mono Examples ---");
+
+        // 1. Mono with a value
+        Mono<String> greetingMono = Mono.just("Hello Reactive World!");
+        System.out.println("Subscribing to greetingMono (just):");
+        greetingMono.subscribe(
+            message -> System.out.println("Greeting: " + message),
+            Throwable::printStackTrace,
+            () -> System.out.println("Greeting mono completed.")
+        );
+        System.out.println("\\n");
+
+        // 2. Mono empty (no value)
+        Mono<String> emptyMono = Mono.empty();
+        System.out.println("Subscribing to emptyMono (empty):");
+        emptyMono.subscribe(
+            value -> System.out.println("Received: " + value), // Won't be called
+            Throwable::printStackTrace,
+            () -> System.out.println("Empty mono completed.")
+        );
+        System.out.println("\\n");
+
+        // 3. Mono with an error
+        Mono<String> errorMono = Mono.error(new RuntimeException("Something went wrong!"));
+        System.out.println("Subscribing to errorMono (error):");
+        errorMono.subscribe(
+            value -> System.out.println("Received: " + value),
+            error -> System.err.println("Error in errorMono: " + error.getMessage()),
+            () -> System.out.println("Error mono completed (this won't print as error terminates stream).")
+        );
+    }
+}`,
+          simulatedOutput: `--- Flux Examples ---
+Subscribing to fruitFlux (array):
+Received fruit: Apple
+Received fruit: Banana
+Received fruit: Orange
+Fruit stream completed.
+
+
+Subscribing to numberFlux (just):
+Processed number: 20
+Processed number: 40
+Number stream completed.
+
+
+Subscribing to longFlux (range and map):
+Generated long: 100
+Generated long: 200
+Generated long: 300
+Generated long: 400
+Generated long: 500
+Generated long: 600
+Generated long: 700
+Generated long: 800
+Generated long: 900
+Generated long: 1000
+Long stream completed.
+
+
+--- Mono Examples ---
+Subscribing to greetingMono (just):
+Greeting: Hello Reactive World!
+Greeting mono completed.
+
+
+Subscribing to emptyMono (empty):
+Empty mono completed.
+
+
+Subscribing to errorMono (error):
+Error in errorMono: Something went wrong!`,
+        },
+        {
+          title:
+            "Module 4: Operators in Reactor (Transformation and Filtering)",
+          dummies: `Operators are like specialized tools you use on your conveyor belt (Flux/Mono) to change, filter, or combine the items as they pass by.
+* **\`map\`**: Changes each item into something else. If you have a conveyor belt of apples, \`map\` can turn them into apple pies. 🍎➡️🥧
+* **\`filter\`**: Lets only certain items pass through. If you have a belt of fruits, \`filter\` can pick out only the red ones. 🔴
+* **\`flatMap\`**: This one's tricky! Imagine each item on your conveyor belt *itself* creates a small, temporary *new* conveyor belt of items. \`flatMap\` takes all the items from *all* these temporary belts and puts them onto your main belt. It's like having a factory that, for each apple, produces a small box of sliced apples. \`flatMap\` combines all the sliced apples from all boxes into one big pile. 🍎➡️[🍎,🍎,🍎]➡️📦`,
+          technical: `Reactor provides a rich set of **operators** that can be chained together to build complex data processing pipelines. Operators are functions that take a \`Publisher\` as input and return a new \`Publisher\`, allowing for declarative composition.
+* **\`map(Function<T, R> mapper)\`**: Transforms each item emitted by the source \`Flux\`/\`Mono\` synchronously into a new item by applying a function.
+* **\`filter(Predicate<T> predicate)\`**: Filters items emitted by the source \`Flux\` by applying a test function. Only items for which the predicate returns \`true\` are emitted.
+* **\`flatMap(Function<T, Publisher<R>> mapper)\`**: Transforms items emitted by the source \`Flux\`/\`Mono\` into \`Publisher\`s, then flattens these inner \`Publisher\`s into a single \`Flux\`, preserving the order of emitted elements from each inner \`Publisher\` but not the overall order of the inner \`Publisher\`s themselves. It's used for asynchronous transformations where each input item can lead to zero, one, or many output items asynchronously.
+* **\`concatMap(Function<T, Publisher<R>> mapper)\`**: Similar to \`flatMap\`, but it processes inner \`Publisher\`s sequentially, preserving the order of the source items. This ensures that the elements from the first inner \`Publisher\` are emitted before elements from the second, and so on.`,
+          useCase: `* **\`map\`**: Converting a stream of \`User\` objects to a stream of \`String\` (their names).
+* **\`filter\`**: Selecting only orders with a total value greater than $100 from an order stream.
+* **\`flatMap\`**: Fetching details for each item in a list. If you have a \`Flux<ProductId>\`, you can use \`flatMap\` to call an asynchronous service for each \`ProductId\` that returns a \`Mono<ProductDetail>\`, then flatten all these \`Mono\`s into a \`Flux<ProductDetail>\`. This is crucial for non-blocking I/O operations.
+* **\`concatMap\`**: Processing a batch of user requests where the order of processing for each user request is important, e.g., applying database updates that must occur in a specific sequence for each user.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+public class ReactorOperators {
+
+    public static void main(String[] args) {
+        System.out.println("--- Transformation: map ---");
+        Flux.just("hello", "world")
+            .map(String::toUpperCase) // Transforms each string to uppercase
+            .subscribe(s -> System.out.println("Mapped: " + s));
+        System.out.println("\\n");
+
+        System.out.println("--- Filtering: filter ---");
+        Flux.range(1, 10)
+            .filter(n -> n % 2 == 0) // Keeps only even numbers
+            .subscribe(n -> System.out.println("Filtered: " + n));
+        System.out.println("\\n");
+
+        System.out.println("--- Asynchronous Transformation: flatMap ---");
+        // Simulating an asynchronous call that returns a Mono
+        // For each user ID, fetch user details (takes some time)
+        Flux.just(101, 102, 103)
+            .flatMap(userId -> getUserDetailsAsync(userId)) // Each userId maps to a Mono<String>
+            .subscribe(detail -> System.out.println("FlatMapped User Detail: " + detail));
+
+        // To ensure the flatMap example completes before the program exits
+        try {
+            Thread.sleep(1000); // Give time for async operations
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("\\n");
+
+        System.out.println("--- Sequential Asynchronous Transformation: concatMap ---");
+        Flux.just("Alpha", "Beta")
+            .concatMap(word -> Mono.just(word.length()) // Get length of each word
+                                .delayElement(java.time.Duration.ofMillis(500)) // Simulate delay
+                                .map(len -> word + " has length " + len))
+            .subscribe(result -> System.out.println("ConcatMapped: " + result));
+
+        // To ensure the concatMap example completes before the program exits
+        try {
+            Thread.sleep(1500); // Give time for async operations
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("\\n");
+    }
+
+    // Simulate an asynchronous call to fetch user details
+    private static Mono<String> getUserDetailsAsync(int userId) {
+        return Mono.defer(() -> {
+            System.out.println("  Fetching details for user: " + userId + " on thread: " + Thread.currentThread().getName());
+            return Mono.just("User " + userId + " details")
+                       .delayElement(java.time.Duration.ofMillis(200)); // Simulate network delay
+        });
+    }
+}`,
+          simulatedOutput: `--- Transformation: map ---
+Mapped: HELLO
+Mapped: WORLD
+
+--- Filtering: filter ---
+Filtered: 2
+Filtered: 4
+Filtered: 6
+Filtered: 8
+Filtered: 10
+
+--- Asynchronous Transformation: flatMap ---
+  Fetching details for user: 101 on thread: main
+  Fetching details for user: 102 on thread: main
+  Fetching details for user: 103 on thread: main
+FlatMapped User Detail: User 101 details
+FlatMapped User Detail: User 102 details
+FlatMapped User Detail: User 103 details
+
+--- Sequential Asynchronous Transformation: concatMap ---
+ConcatMapped: Alpha has length 5
+ConcatMapped: Beta has length 4`,
+        },
+        {
+          title: "Module 5: Error Handling in Reactive Streams",
+          dummies: `Imagine your pizza delivery stream. What if the delivery driver gets a flat tire? 🚗💥
+* **\`onError\`**: This is like the delivery company calling you to say, "Bad news, your pizza won't arrive. Here's why." It's the standard way to get notified of a problem. Once an error occurs, the stream stops.
+* **\`onErrorResume\`**: "Okay, the pizza driver had a flat tire, but we're sending a new driver with a *different* pizza (or a refund)." It allows you to switch to a fallback plan or alternative stream if an error happens.
+* **\`onErrorReturn\`**: "Flat tire, sorry. But here's a coupon for a free pizza next time." It allows you to return a specific, default value instead of letting the error propagate.
+* **\`retry\`**: "Flat tire? Let's try sending another driver from a different branch!" It attempts to re-subscribe to the original source if an error occurs, hoping it will succeed on a subsequent attempt.`,
+          technical: `Error handling in Reactive Streams follows the "fail fast" principle. When an error occurs in a \`Publisher\`, it emits an \`onError\` signal, and the stream terminates. Reactor provides several operators to manage these error signals:
+* **\`doOnError(Consumer<Throwable> onError)\`**: Performs a side-effect (e.g., logging) when an error occurs, but the error still propagates downstream.
+* **\`onErrorResume(Function<Throwable, ? extends Publisher<T>> fallback)\`**: Resumes the sequence by falling back to a new \`Publisher\` when an error occurs.
+* **\`onErrorReturn(Function<Throwable, T> fallbackValue)\` or \`onErrorReturn(T fallbackValue)\`**: Returns a static fallback value when an error occurs, and then completes the sequence.
+* **\`retry(long numRetries)\`**: Re-subscribes to the source \`Publisher\` up to \`numRetries\` times upon an \`onError\` signal.
+* **\`retryWhen(Function<Flux<Throwable>, ? extends Publisher<?>> companion)\`**: Provides more fine-grained control over retry logic, allowing for exponential backoff, conditional retries, etc., by reacting to a stream of error signals.`,
+          useCase: `* **\`onErrorResume\`**: If an external API call fails due to a network error, switch to fetching data from a local cache or a backup service.
+* **\`onErrorReturn\`**: If a configuration lookup fails, provide a default configuration value to ensure the application can still start.
+* **\`retry\`**: When calling a flaky microservice that occasionally times out, retry the call a few times before giving up.
+* **\`doOnError\`**: Logging an error to a monitoring system without interrupting the error propagation.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
+
+public class ReactorErrorHandling {
+
+    public static void main(String[] args) {
+        System.out.println("--- Error Propagation ---");
+        Flux.just(1, 2, 3)
+            .map(i -> {
+                if (i == 2) throw new RuntimeException("Error at item 2!");
+                return i;
+            })
+            .subscribe(
+                data -> System.out.println("Received: " + data),
+                error -> System.err.println("Error propagating: " + error.getMessage()),
+                () -> System.out.println("Completed (will not happen after error).")
+            );
+        System.out.println("\\n");
+
+        System.out.println("--- doOnError (Side-effect) ---");
+        Flux.just("a", "b", "c")
+            .map(s -> {
+                if ("b".equals(s)) throw new RuntimeException("Problem with 'b'");
+                return s.toUpperCase();
+            })
+            .doOnError(e -> System.out.println("  [doOnError] Logging error: " + e.getMessage()))
+            .subscribe(
+                data -> System.out.println("Received: " + data),
+                error -> System.err.println("Error handled by subscriber: " + error.getMessage())
+            );
+        System.out.println("\\n");
+
+        System.out.println("--- onErrorResume (Fallback to another publisher) ---");
+        Flux.range(1, 5)
+            .map(i -> {
+                if (i == 3) throw new RuntimeException("Failed at 3!");
+                return i;
+            })
+            .onErrorResume(e -> {
+                System.out.println("  [onErrorResume] Falling back due to: " + e.getMessage());
+                return Flux.just(10, 11, 12); // Fallback to a new Flux
+            })
+            .subscribe(
+                data -> System.out.println("Received (resume): " + data),
+                error -> System.err.println("Error (resume): " + error.getMessage()),
+                () -> System.out.println("Completed (resume).")
+            );
+        System.out.println("\\n");
+
+        System.out.println("--- onErrorReturn (Fallback to a static value) ---");
+        Mono.just("data")
+            .map(s -> {
+                if (Math.random() > 0.5) throw new RuntimeException("Random failure!");
+                return s.toUpperCase();
+            })
+            .onErrorReturn("DEFAULT_VALUE") // Returns a default value on error
+            .subscribe(
+                data -> System.out.println("Received (return): " + data),
+                error -> System.err.println("Error (return): " + error.getMessage()), // Won't be called if errorReturn handles it
+                () -> System.out.println("Completed (return).")
+            );
+        System.out.println("\\n");
+
+        System.out.println("--- retry (Simple Retry) ---");
+        // Simulating a flaky network call
+        class FlakyService {
+            private int callCount = 0;
+            public Mono<String> getData() {
+                return Mono.defer(() -> {
+                    callCount++;
+                    if (callCount < 3) {
+                        System.out.println("  FlakyService: Call " + callCount + " failing...");
+                        return Mono.error(new RuntimeException("Network Glitch!"));
+                    }
+                    System.out.println("  FlakyService: Call " + callCount + " successful!");
+                    return Mono.just("Successful Data!");
+                });
+            }
+        }
+
+        FlakyService service = new FlakyService();
+        service.getData()
+               .retry(2) // Retries up to 2 times (total 3 attempts)
+               .subscribe(
+                   data -> System.out.println("Received (retry): " + data),
+                   error -> System.err.println("Error (retry) after all retries: " + error.getMessage())
+               );
+        System.out.println("\\n");
+
+        System.out.println("--- retryWhen (Exponential Backoff) ---");
+        // Simulate a service that always fails on first attempt
+        Flux.interval(Duration.ofMillis(100))
+            .take(5)
+            .map(i -> {
+                if (i < 2) throw new RuntimeException("Initial failure: " + i);
+                return "Item: " + i;
+            })
+            .doOnNext(System.out::println)
+            .retryWhen(Retry.backoff(3, Duration.ofMillis(500))
+                            .maxBackoff(Duration.ofSeconds(2))
+                            .jitter(0.5)) // Jitter for better distribution
+            .onErrorResume(e -> {
+                System.err.println("Stream failed after retries: " + e.getMessage());
+                return Mono.empty();
+            })
+            .blockLast(); // Block to see results in main thread for this example
+    }
+}`,
+          simulatedOutput: `--- Error Propagation ---
+Received: 1
+Error propagating: Error at item 2!
+
+--- doOnError (Side-effect) ---
+Received: A
+  [doOnError] Logging error: Problem with 'b'
+Error handled by subscriber: Problem with 'b'
+
+--- onErrorResume (Fallback to another publisher) ---
+Received (resume): 1
+Received (resume): 2
+  [onErrorResume] Falling back due to: Failed at 3!
+Received (resume): 10
+Received (resume): 11
+Received (resume): 12
+Completed (resume).
+
+--- onErrorReturn (Fallback to a static value) ---
+Received (return): DEFAULT_VALUE
+Completed (return).
+
+--- retry (Simple Retry) ---
+  FlakyService: Call 1 failing...
+  FlakyService: Call 2 failing...
+  FlakyService: Call 3 successful!
+Received (retry): Successful Data!
+
+--- retryWhen (Exponential Backoff) ---
+Item: 2
+Item: 3
+Item: 4
+Stream failed after retries: Initial failure: 0`,
+        },
+        {
+          title: "Module 6: Schedulers and Concurrency",
+          dummies: `Imagine your reactive conveyor belt assembly line.
+* **Schedulers**: These are like assigning different **work teams** to different parts of your assembly line.
+    * **\`Schedulers.immediate()\`**: "Do this work **right now** on the same team that just finished the previous task." (Synchronous)
+    * **\`Schedulers.single()\`**: "Assign this task to **one dedicated worker** who handles all such tasks sequentially." (For singleton background operations)
+    * **\`Schedulers.elastic()\`**: "We need a lot of workers for I/O tasks. **Hire as many as needed**, but let them go when they're idle." (Good for blocking I/O like database calls, but often replaced by \`boundedElastic\` in newer versions).
+    * **\`Schedulers.parallel()\`**: "We have a lot of CPU-bound tasks. Use a team of workers equal to the number of CPU cores to **process things in parallel**." (For computation-intensive tasks)
+    * **\`Schedulers.boundedElastic()\`**: A newer, more controlled version of \`elastic\`. "We need workers for blocking tasks, but let's set a **limit** on how many we can hire to prevent resource exhaustion."
+
+* **\`publishOn\`**: "From **this point forward** on the assembly line, hand off the work to a *different* work team (Scheduler)." This changes where *subsequent operators* execute.
+* **\`subscribeOn\`**: "When someone places an order (subscribes), start the *entire* assembly line (the source and all operators before the first \`publishOn\`) on a *specific* work team (Scheduler)." This affects where the subscription happens and the source processing begins.`,
+          technical: `**Schedulers** in Reactor provide an abstraction for executing operations on specific thread pools, managing concurrency and parallelism. They are implementations of the \`Scheduler\` interface.
+* **\`Schedulers.immediate()\`**: Executes tasks immediately on the calling thread.
+* **\`Schedulers.single()\`**: Reuses a single thread for all subscribers. Useful for tasks that must be serialized.
+* **\`Schedulers.parallel()\`**: Optimized for CPU-bound work. Creates a fixed pool of threads (typically equal to the number of CPU cores).
+* **\`Schedulers.boundedElastic()\`**: A dynamic pool of worker threads suitable for blocking I/O operations (like network calls, database access). It expands as needed up to a configurable maximum and shrinks when idle. This is the recommended choice for blocking operations over the deprecated \`elastic\`.
+* **\`Schedulers.fromExecutor(Executor executor)\`**: Allows using a custom \`Executor\` or \`ExecutorService\` as a Scheduler.
+
+**\`subscribeOn(Scheduler scheduler)\`**: Specifies the \`Scheduler\` on which the subscription to the \`Publisher\` will happen and on which the source will execute. It affects the entire chain *before* the first \`publishOn\`.
+**\`publishOn(Scheduler scheduler)\`**: Specifies the \`Scheduler\` on which the subsequent operators in the chain will execute. It changes the execution context for operators *downstream* from its position.`,
+          useCase: `* **\`subscribeOn\`**: Performing a long-running data loading operation from a database on a \`boundedElastic\` scheduler so it doesn't block the main thread.
+* **\`publishOn\`**: Transforming data on a \`parallel\` scheduler (for CPU-bound work) after fetching it from a network on a \`boundedElastic\` scheduler, and then observing the final result on the \`single\` scheduler if it needs to update a UI on a specific thread.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
+
+public class ReactorSchedulers {
+
+    public static void main(String[] args) {
+        System.out.println("--- Schedulers Example ---");
+
+        // Example 1: subscribeOn vs publishOn
+        // subscribeOn affects where the source creation and subscription happen.
+        // publishOn affects where subsequent operators execute.
+
+        System.out.println("Starting on thread: " + Thread.currentThread().getName());
+
+        Flux.range(1, 5)
+            .doOnNext(i -> System.out.println("  Before subscribeOn: " + i + " on " + Thread.currentThread().getName()))
+            .subscribeOn(Schedulers.boundedElastic()) // Source and initial operations run on boundedElastic
+            .doOnNext(i -> System.out.println("  After subscribeOn, Before publishOn: " + i + " on " + Thread.currentThread().getName()))
+            .publishOn(Schedulers.parallel()) // Subsequent operations run on parallel
+            .map(i -> {
+                System.out.println("  Mapping " + i + " on " + Thread.currentThread().getName());
+                return i * 2;
+            })
+            .filter(i -> {
+                System.out.println("  Filtering " + i + " on " + Thread.currentThread().getName());
+                return i % 4 == 0;
+            })
+            .publishOn(Schedulers.single()) // Further operations on single
+            .doOnNext(i -> System.out.println("  Final doOnNext " + i + " on " + Thread.currentThread().getName()))
+            .subscribe(
+                data -> System.out.println("  Subscriber received: " + data + " on " + Thread.currentThread().getName()),
+                Throwable::printStackTrace,
+                () -> System.out.println("  Stream Completed on " + Thread.currentThread().getName())
+            );
+
+        // Keep main thread alive to see asynchronous results
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        System.out.println("\\n--- Schedulers for specific tasks ---");
+
+        // Example 2: Using Schedulers for a typical scenario
+        // Fetching data (blocking I/O) on boundedElastic, processing on parallel
+        Mono<String> userData = Mono.fromCallable(() -> {
+            System.out.println("Fetching user data on: " + Thread.currentThread().getName());
+            Thread.sleep(300); // Simulate blocking I/O call (e.g., database)
+            return "User: Alice";
+        }).subscribeOn(Schedulers.boundedElastic()); // Execute blocking call on boundedElastic
+
+        userData
+            .map(s -> {
+                System.out.println("Processing user data on: " + Thread.currentThread().getName());
+                return s.toUpperCase();
+            })
+            .publishOn(Schedulers.parallel()) // Move to parallel for CPU-bound transformation
+            .flatMap(s -> Mono.fromCallable(() -> {
+                System.out.println("Performing another CPU-intensive task on: " + Thread.currentThread().getName());
+                Thread.sleep(100);
+                return s + " - Processed";
+            }).subscribeOn(Schedulers.parallel())) // Ensure this flatMap operation is also on parallel
+            .subscribe(
+                result -> System.out.println("Final result received on: " + Thread.currentThread().getName() + " -> " + result),
+                Throwable::printStackTrace
+            );
+
+        try {
+            Thread.sleep(1000); // Wait for the second example to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        System.out.println("\\n--- Schedulers.single() example ---");
+        Flux.range(1, 3)
+            .doOnNext(i -> System.out.println("Original: " + i + " on " + Thread.currentThread().getName()))
+            .publishOn(Schedulers.single()) // All subsequent items will be processed on the single thread
+            .map(i -> {
+                System.out.println("Mapped " + i + " on single thread: " + Thread.currentThread().getName());
+                return i * 10;
+            })
+            .subscribe(val -> System.out.println("Received: " + val + " on single thread: " + Thread.currentThread().getName()));
+
+        try {
+            Thread.sleep(500); // Wait for the single scheduler example to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}`,
+          simulatedOutput: `--- Schedulers Example ---
+Starting on thread: main
+  Before subscribeOn: 1 on main
+  Before subscribeOn: 2 on main
+  Before subscribeOn: 3 on main
+  Before subscribeOn: 4 on main
+  Before subscribeOn: 5 on main
+  After subscribeOn, Before publishOn: 1 on boundedElastic-1
+  After subscribeOn, Before publishOn: 2 on boundedElastic-1
+  After subscribeOn, Before publishOn: 3 on boundedElastic-1
+  After subscribeOn, Before publishOn: 4 on boundedElastic-1
+  After subscribeOn, Before publishOn: 5 on boundedElastic-1
+  Mapping 1 on parallel-1
+  Mapping 2 on parallel-1
+  Mapping 3 on parallel-1
+  Mapping 4 on parallel-1
+  Mapping 5 on parallel-1
+  Filtering 2 on parallel-1
+  Filtering 4 on parallel-1
+  Filtering 6 on parallel-1
+  Filtering 8 on parallel-1
+  Filtering 10 on parallel-1
+  Final doOnNext 4 on single-1
+  Subscriber received: 4 on single-1
+  Final doOnNext 8 on single-1
+  Subscriber received: 8 on single-1
+  Stream Completed on single-1
+
+--- Schedulers for specific tasks ---
+Fetching user data on: boundedElastic-2
+Processing user data on: boundedElastic-2
+Performing another CPU-intensive task on: parallel-2
+Final result received on: parallel-2 -> USER: ALICE - Processed
+
+--- Schedulers.single() example ---
+Original: 1 on main
+Original: 2 on main
+Original: 3 on main
+Mapped 1 on single-3
+Received: 10 on single-3
+Mapped 2 on single-3
+Received: 20 on single-3
+Mapped 3 on single-3
+Received: 30 on single-3`,
+        },
+        {
+          title:
+            "Module 7: Combining Streams (Merging, Zipping, Concatenating)",
+          dummies: `Imagine you have multiple conveyor belts, each delivering different types of items.
+* **\`merge\`**: You dump all items from multiple belts onto one *new* big belt, as they arrive. The order can get mixed up. (First come, first served) 📦🍎📦🍬
+* **\`zip\`**: You pair up items, one from each belt, like putting a hat and a scarf together for a single outfit. It waits for *one* item from *each* belt before it can make a pair. If one belt runs out, the zipping stops. 🧢🧣➡️👫
+* **\`concat\`**: You empty one belt completely, then when it's totally done, you start emptying the next belt. The order is strictly preserved. 📦📦📦... then 🍎🍎🍎`,
+          technical: `Reactor provides operators to combine \`Flux\` and \`Mono\` streams:
+* **\`Flux.merge(Publisher<?>... sources)\`**: Combines multiple \`Publisher\`s into a single \`Flux\`, interleaving their emissions. The order of elements from different sources is not guaranteed, but the relative order within each source is preserved.
+* **\`Flux.concat(Publisher<?>... sources)\`**: Concatenates multiple \`Publisher\`s sequentially. It subscribes to the next \`Publisher\` only after the previous one completes. This preserves the order of elements across sources.
+* **\`Flux.zip(Publisher<T1> p1, Publisher<T2> p2, BiFunction<T1, T2, R> combinator)\`**: Combines the latest emitted elements from each source \`Publisher\` into a \`Tuple\` or a custom type using a \`BiFunction\`. The resulting \`Flux\` emits an item only when all source \`Publisher\`s have emitted an item. The combined stream completes when any of the source \`Publisher\`s completes.
+* **\`Flux.combineLatest(Publisher<?>... sources, Function<Object[], R> combinator)\`**: Combines the latest emitted elements from all source \`Publisher\`s into a single output. Whenever any source emits an item, it combines that item with the latest items from all other sources. This is useful when you need to react to changes in *any* of the input streams, using the current state of all streams.`,
+          useCase: `* **\`merge\`**: Combining log streams from multiple microservices into a single, real-time log viewer.
+* **\`concat\`**: Loading data from multiple database tables sequentially, where the data from one table is needed before loading the next (e.g., master data then transactional data).
+* **\`zip\`**: Displaying a user's profile and their latest order details, where both pieces of data need to be fetched independently but presented together. Fetching \`Mono<User>\` and \`Mono<Order>\` and zipping them into \`Mono<Tuple2<User, Order>>\`.
+* **\`combineLatest\`**: Displaying a stock price alongside its related news headlines, where either the price or the news can update independently, but you always want to see the latest of both.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+
+public class ReactorCombiningStreams {
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("--- Flux.merge (Interleaving emissions) ---");
+        Flux<String> flux1 = Flux.just("A", "B", "C")
+                                 .delayElements(Duration.ofMillis(100)); // Simulate delay
+        Flux<String> flux2 = Flux.just("X", "Y", "Z")
+                                 .delayElements(Duration.ofMillis(150));
+
+        Flux.merge(flux1, flux2)
+            .subscribe(s -> System.out.println("Merged: " + s));
+        Thread.sleep(500); // Give time for async operations
+        System.out.println("\\n");
+
+        System.out.println("--- Flux.concat (Sequential emissions) ---");
+        Flux<String> flux3 = Flux.just("1", "2", "3")
+                                 .delayElements(Duration.ofMillis(100))
+                                 .doOnComplete(() -> System.out.println("Flux 3 completed."));
+        Flux<String> flux4 = Flux.just("a", "b", "c")
+                                 .delayElements(Duration.ofMillis(50))
+                                 .doOnComplete(() -> System.out.println("Flux 4 completed."));
+
+        Flux.concat(flux3, flux4)
+            .subscribe(s -> System.out.println("Concatenated: " + s));
+        Thread.sleep(800); // Give time for async operations
+        System.out.println("\\n");
+
+        System.out.println("--- Flux.zip (Pairing emissions) ---");
+        Flux<String> names = Flux.just("Alice", "Bob", "Charlie");
+        Flux<Integer> ages = Flux.just(30, 24, 35);
+
+        Flux.zip(names, ages, (name, age) -> name + " is " + age + " years old")
+            .subscribe(s -> System.out.println("Zipped: " + s));
+        System.out.println("\\n");
+
+        System.out.println("--- Mono.zip (Combining single values) ---");
+        Mono<String> userMono = Mono.just("user123");
+        Mono<Integer> orderCountMono = Mono.just(5);
+
+        Mono.zip(userMono, orderCountMono, (user, count) -> "User: " + user + ", Orders: " + count)
+            .subscribe(s -> System.out.println("Zipped Mono: " + s));
+        System.out.println("\\n");
+
+        System.out.println("--- Flux.combineLatest (Reacting to latest emissions) ---");
+        Flux<Long> fastSource = Flux.interval(Duration.ofMillis(100)).map(i -> i * 10);
+        Flux<String> slowSource = Flux.interval(Duration.ofMillis(300)).map(i -> "Event-" + i);
+
+        Flux.combineLatest(fastSource, slowSource, (fast, slow) -> "Fast: " + fast + ", Slow: " + slow)
+            .take(5) // Take 5 combined results
+            .subscribe(s -> System.out.println("Combined Latest: " + s));
+        Thread.sleep(1000); // Give time for async operations
+        System.out.println("\\n");
+    }
+}`,
+          simulatedOutput: `--- Flux.merge (Interleaving emissions) ---
+Merged: A
+Merged: X
+Merged: B
+Merged: Y
+Merged: C
+Merged: Z
+
+--- Flux.concat (Sequential emissions) ---
+Concatenated: 1
+Concatenated: 2
+Concatenated: 3
+Flux 3 completed.
+Concatenated: a
+Concatenated: b
+Concatenated: c
+Flux 4 completed.
+
+--- Flux.zip (Pairing emissions) ---
+Zipped: Alice is 30 years old
+Zipped: Bob is 24 years old
+Zipped: Charlie is 35 years old
+
+--- Mono.zip (Combining single values) ---
+Zipped Mono: User: user123, Orders: 5
+
+--- Flux.combineLatest (Reacting to latest emissions) ---
+Combined Latest: Fast: 0, Slow: Event-0
+Combined Latest: Fast: 10, Slow: Event-0
+Combined Latest: Fast: 20, Slow: Event-0
+Combined Latest: Fast: 20, Slow: Event-1
+Combined Latest: Fast: 30, Slow: Event-1`,
+        },
+        {
+          title: "Module 8: Backpressure in Detail",
+          dummies: `Remember our "tap and bucket" analogy? 🚰➡️🗑️
+* **Backpressure** is like the bucket telling the tap, "Whoa there, I'm almost full! Send me just 3 more drops, then wait until I ask for more." It prevents the tap from overflowing the bucket.
+* If the tap ignores the bucket, the bucket might burst! In programming, this means your application runs out of memory or crashes.
+* **Automatic Backpressure**: Reactor handles a lot of this for you. When you \`subscribe\`, it automatically requests a certain amount of data.
+* **Manual Backpressure**: Sometimes, you need to tell the system *exactly* how much data you can handle at a time. This is like explicitly counting drops from the tap.`,
+          technical: `**Backpressure** is a flow control mechanism where a \`Subscriber\` signals to its \`Publisher\` how many items it is willing to receive. This prevents the \`Publisher\` from producing items faster than the \`Subscriber\` can consume them, thus avoiding resource exhaustion (e.g., OutOfMemoryError).
+
+In Project Reactor, backpressure is managed by the \`request(long n)\` method on the \`Subscription\` interface.
+* **Unbounded Request**: \`request(Long.MAX_VALUE)\` signals that the \`Subscriber\` can handle an infinite number of items, effectively turning off explicit backpressure. This is the default for \`subscribe()\` without arguments.
+* **Bounded Request**: \`request(n)\` signals the demand for \`n\` items.
+* **Strategies for Handling Overproduction**:
+    * **\`onBackpressureBuffer()\`**: Buffers items when the subscriber cannot keep up. Can lead to \`OutOfMemoryError\` if the buffer grows too large.
+    * **\`onBackpressureDrop()\`**: Drops items when the subscriber cannot keep up. Data loss occurs.
+    * **\`onBackpressureLatest()\`**: Keeps only the latest item, dropping older items when the subscriber cannot keep up.
+    * **\`onBackpressureError()\`**: Emits an \`IllegalStateException\` when the subscriber cannot keep up.`,
+          useCase: `* **Batch Processing**: A service processes data in batches of 100 records. It can use backpressure to request 100 records, process them, and then request another 100.
+* **Rate Limiting**: An API gateway that needs to limit requests to a downstream service can use backpressure to control the flow of requests.
+* **UI Updates**: A UI component that can only render a limited number of events per second can signal backpressure to a fast-producing event stream to avoid overwhelming the UI thread.`,
+          code: `import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class ReactorBackpressure {
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("--- Default Backpressure (Implicit) ---");
+        // When you just subscribe, Reactor often requests Long.MAX_VALUE
+        // unless there's an intermediate operator that explicitly manages demand.
+        Flux.range(1, 100)
+            .doOnRequest(r -> System.out.println("  Source received request for: " + r + " items"))
+            .doOnNext(i -> System.out.println("  Processing: " + i))
+            .subscribe(
+                data -> System.out.println("  Subscriber consuming: " + data),
+                Throwable::printStackTrace,
+                () -> System.out.println("  Default backpressure stream completed.")
+            );
+        System.out.println("\\n");
+
+        System.out.println("--- Manual Backpressure (Custom Subscriber) ---");
+        // Implementing a custom subscriber to control demand explicitly
+        Flux.interval(Duration.ofMillis(10)) // Emits items every 10ms
+            .doOnRequest(r -> System.out.println("  Interval Flux requested: " + r + " items"))
+            .subscribe(new org.reactivestreams.Subscriber<Long>() {
+                private org.reactivestreams.Subscription s;
+                private AtomicLong received = new AtomicLong(0);
+                private final int batchSize = 3;
+
+                @Override
+                public void onSubscribe(org.reactivestreams.Subscription s) {
+                    this.s = s;
+                    System.out.println("  Custom Subscriber: Requesting " + batchSize + " items initially.");
+                    s.request(batchSize); // Request initial batch
+                }
+
+                @Override
+                public void onNext(Long item) {
+                    received.incrementAndGet();
+                    System.out.println("  Custom Subscriber: Received " + item);
+                    if (received.get() % batchSize == 0) {
+                        System.out.println("  Custom Subscriber: Processed " + batchSize + " items, requesting more.");
+                        s.request(batchSize); // Request next batch
+                    }
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    System.err.println("  Custom Subscriber: Error: " + t.getMessage());
+                }
+
+                @Override
+                public void onComplete() {
+                    System.out.println("  Custom Subscriber: Completed.");
+                }
+            });
+        Thread.sleep(500); // Allow some time for intervals to run
+        System.out.println("\\n");
+
+
+        System.out.println("--- onBackpressureBuffer (Buffering) ---");
+        Flux.interval(Duration.ofMillis(10)) // Fast producer
+            .onBackpressureBuffer(5,
+                o -> System.out.println("  Buffer overflow, dropping: " + o), // Callback if buffer overflows
+                Flux.OverflowStrategy.DROP_LATEST) // Strategy if buffer overflows
+            .publishOn(Schedulers.boundedElastic()) // Slow consumer
+            .doOnNext(i -> {
+                try {
+                    System.out.println("  Consumer processing buffered: " + i);
+                    Thread.sleep(100); // Simulate slow processing
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            })
+            .take(10) // Take a limited number of items to show completion
+            .blockLast(); // Block to see results
+        System.out.println("  Buffer example completed.");
+        System.out.println("\\n");
+
+        System.out.println("--- onBackpressureDrop (Dropping) ---");
+        Flux.interval(Duration.ofMillis(10)) // Fast producer
+            .onBackpressureDrop(dropped -> System.out.println("  Dropped item: " + dropped))
+            .publishOn(Schedulers.boundedElastic()) // Slow consumer
+            .doOnNext(i -> {
+                try {
+                    System.out.println("  Consumer processing dropped: " + i);
+                    Thread.sleep(100); // Simulate slow processing
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            })
+            .take(10)
+            .blockLast();
+        System.out.println("  Drop example completed.");
+        System.out.println("\\n");
+
+        System.out.println("--- onBackpressureError (Erroring) ---");
+        Flux.interval(Duration.ofMillis(10)) // Fast producer
+            .onBackpressureError()
+            .publishOn(Schedulers.boundedElastic()) // Slow consumer
+            .doOnNext(i -> {
+                try {
+                    System.out.println("  Consumer processing erroring: " + i);
+                    Thread.sleep(100); // Simulate slow processing
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            })
+            .onErrorResume(e -> {
+                System.err.println("  Error caught due to backpressure: " + e.getMessage());
+                return Mono.empty(); // Resume with empty to stop the stream gracefully
+            })
+            .take(5) // Limit to avoid indefinite blocking if no error
+            .blockLast();
+        System.out.println("  Error example completed.");
+    }
+}`,
+          simulatedOutput: `--- Default Backpressure (Implicit) ---
+  Source received request for: 9223372036854775807 items
+  Processing: 1
+  Subscriber consuming: 1
+  Processing: 2
+  Subscriber consuming: 2
+  ... (up to 100 items)
+  Processing: 100
+  Subscriber consuming: 100
+  Default backpressure stream completed.
+
+--- Manual Backpressure (Custom Subscriber) ---
+  Custom Subscriber: Requesting 3 items initially.
+  Interval Flux requested: 3 items
+  Custom Subscriber: Received 0
+  Custom Subscriber: Received 1
+  Custom Subscriber: Received 2
+  Custom Subscriber: Processed 3 items, requesting more.
+  Interval Flux requested: 3 items
+  Custom Subscriber: Received 3
+  Custom Subscriber: Received 4
+  Custom Subscriber: Received 5
+  Custom Subscriber: Processed 3 items, requesting more.
+  Interval Flux requested: 3 items
+  Custom Subscriber: Received 6
+  Custom Subscriber: Received 7
+  Custom Subscriber: Received 8
+  Custom Subscriber: Processed 3 items, requesting more.
+  Interval Flux requested: 3 items
+  Custom Subscriber: Received 9
+  Custom Subscriber: Received 10
+  Custom Subscriber: Received 11
+  Custom Subscriber: Processed 3 items, requesting more.
+  Interval Flux requested: 3 items
+
+--- onBackpressureBuffer (Buffering) ---
+  Consumer processing buffered: 0
+  Consumer processing buffered: 1
+  Consumer processing buffered: 2
+  Consumer processing buffered: 3
+  Consumer processing buffered: 4
+  Consumer processing buffered: 5
+  Consumer processing buffered: 6
+  Consumer processing buffered: 7
+  Consumer processing buffered: 8
+  Consumer processing buffered: 9
+  Buffer example completed.
+
+--- onBackpressureDrop (Dropping) ---
+  Dropped item: 5
+  Dropped item: 6
+  Dropped item: 7
+  Dropped item: 8
+  Dropped item: 9
+  Dropped item: 10
+  Dropped item: 11
+  Dropped item: 12
+  Dropped item: 13
+  Dropped item: 14
+  Consumer processing dropped: 0
+  Consumer processing dropped: 1
+  Consumer processing dropped: 2
+  Consumer processing dropped: 3
+  Consumer processing dropped: 4
+  Consumer processing dropped: 15
+  Consumer processing dropped: 16
+  Consumer processing dropped: 17
+  Consumer processing dropped: 18
+  Consumer processing dropped: 19
+  Drop example completed.
+
+--- onBackpressureError (Erroring) ---
+  Consumer processing erroring: 0
+  Consumer processing erroring: 1
+  Consumer processing erroring: 2
+  Error caught due to backpressure: The producer released too many elements`,
+        },
+      ];
+
+      let currentModuleIndex = 0;
+      let showOutput = false;
+
+      const moduleNav = document.getElementById("module-nav");
+      const moduleContentArea = document.getElementById("module-content-area");
+      const prevModuleBtn = document.getElementById("prev-module-btn");
+      const nextModuleBtn = document.getElementById("next-module-btn");
+
+      function renderModuleContent() {
+        const module = modulesData[currentModuleIndex];
+        moduleContentArea.innerHTML = `
+                <div class="p-6 md:p-8 bg-white rounded-xl shadow-lg flex flex-col h-full">
+                    <h2 class="text-3xl font-bold text-indigo-700 mb-6 border-b-2 border-indigo-200 pb-3">
+                        ${module.title}
+                    </h2>
+
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">
+                            <span class="text-indigo-500">😕</span> Explanation for Dummies:
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">${
+                          module.dummies
+                        }</p>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">
+                            <span class="text-indigo-500">🧑‍💻</span> Full Technical Definition:
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">${
+                          module.technical
+                        }</p>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">
+                            <span class="text-indigo-500">💡</span> Use Case Example:
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">${
+                          module.useCase
+                        }</p>
+                    </div>
+
+                    <div class="flex-grow flex flex-col">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">
+                            <span class="text-indigo-500">💻</span> Code Example:
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-2">
+                            (Note: This is a simulated environment. The Java code is for viewing and editing, but not live execution. Click "Run Code" to see the expected output.)
+                        </p>
+                        <div class="bg-gray-900 rounded-lg p-4 mb-4 overflow-auto max-h-96">
+                            <pre class="text-green-300 text-sm font-mono whitespace-pre-wrap">
+                                <textarea id="code-editor" class="w-full h-full bg-transparent text-green-300 font-mono text-sm resize-none outline-none" rows="20">${
+                                  module.code
+                                }</textarea>
+                            </pre>
+                        </div>
+                        <button id="run-code-btn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 self-start mb-4">
+                            Run Code
+                        </button>
+
+                        <div id="simulated-output-section" class="mt-4 flex-grow flex flex-col ${
+                          showOutput ? "" : "hidden"
+                        }">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-3">
+                                <span class="text-indigo-500">▶️</span> Simulated Output:
+                            </h3>
+                            <div class="bg-gray-800 rounded-lg p-4 overflow-auto max-h-64 flex-grow">
+                                <pre class="text-gray-100 text-sm font-mono whitespace-pre-wrap">${
+                                  module.simulatedOutput
+                                }</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        document.getElementById("run-code-btn").onclick = () => {
+          showOutput = true;
+          document
+            .getElementById("simulated-output-section")
+            .classList.remove("hidden");
+        };
+
+        // Update code in modulesData when textarea changes
+        document.getElementById("code-editor").oninput = (event) => {
+          modulesData[currentModuleIndex].code = event.target.value;
+        };
+
+        updateNavigationButtons();
+        updateModuleNavHighlight();
+      }
+
+      function renderModuleNavigation() {
+        moduleNav.innerHTML = "";
+        modulesData.forEach((module, index) => {
+          const li = document.createElement("li");
+          const button = document.createElement("button");
+          button.textContent = module.title;
+          button.className = `w-full text-left py-2 px-4 rounded-lg transition duration-200 ease-in-out`;
+          button.onclick = () => {
+            showOutput = false;
+            currentModuleIndex = index;
+            renderModuleContent();
+          };
+          li.appendChild(button);
+          moduleNav.appendChild(li);
+        });
+        updateModuleNavHighlight();
+      }
+
+      function updateNavigationButtons() {
+        prevModuleBtn.disabled = currentModuleIndex === 0;
+        nextModuleBtn.disabled = currentModuleIndex === modulesData.length - 1;
+
+        prevModuleBtn.className = `py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out ${
+          currentModuleIndex === 0
+            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+            : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md transform hover:scale-105"
+        }`;
+        nextModuleBtn.className = `py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out ${
+          currentModuleIndex === modulesData.length - 1
+            ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+            : "bg-indigo-500 hover:bg-indigo-600 text-white shadow-md transform hover:scale-105"
+        }`;
+      }
+
+      function updateModuleNavHighlight() {
+        const navButtons = moduleNav.querySelectorAll("button");
+        navButtons.forEach((button, index) => {
+          if (index === currentModuleIndex) {
+            button.classList.add(
+              "bg-indigo-500",
+              "text-white",
+              "font-semibold",
+              "shadow-md"
+            );
+            button.classList.remove(
+              "bg-gray-100",
+              "text-gray-700",
+              "hover:bg-gray-200",
+              "hover:text-gray-900"
+            );
+          } else {
+            button.classList.remove(
+              "bg-indigo-500",
+              "text-white",
+              "font-semibold",
+              "shadow-md"
+            );
+            button.classList.add(
+              "bg-gray-100",
+              "text-gray-700",
+              "hover:bg-gray-200",
+              "hover:text-gray-900"
+            );
+          }
+        });
+      }
+
+      // Event Listeners for main navigation buttons
+      prevModuleBtn.addEventListener("click", () => {
+        if (currentModuleIndex > 0) {
+          showOutput = false;
+          currentModuleIndex--;
+          renderModuleContent();
+        }
+      });
+
+      nextModuleBtn.addEventListener("click", () => {
+        if (currentModuleIndex < modulesData.length - 1) {
+          showOutput = false;
+          currentModuleIndex++;
+          renderModuleContent();
+        }
+      });
+
+      // Initial render
+      document.addEventListener("DOMContentLoaded", () => {
+        renderModuleNavigation();
+        renderModuleContent();
+      });
+    </script>
+  </body>
+</html>
